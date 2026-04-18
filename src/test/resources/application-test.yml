@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:vmetrix-test;MODE=Oracle;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+  sql:
+    init:
+      mode: always
+
+  h2:
+    console:
+      enabled: false
+
+logging:
+  level:
+    com.vmetrix.querymanager: WARN
+    org.hibernate.SQL: WARN
