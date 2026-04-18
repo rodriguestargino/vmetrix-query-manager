@@ -1,5 +1,6 @@
 package com.vmetrix.querymanager.application.service;
 
+import com.vmetrix.querymanager.domain.model.EntityDefinition;
 import com.vmetrix.querymanager.domain.model.EntityMetadata;
 import com.vmetrix.querymanager.domain.model.FieldMetadata;
 import com.vmetrix.querymanager.domain.model.RelationshipMetadata;
@@ -11,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -88,5 +91,24 @@ public class MetadataService {
 
     public List<RelationshipMetadata> findRelationships(String sourceLogicalEntityName) {
         return relationshipCache.getOrDefault(sourceLogicalEntityName, Collections.emptyList());
+    }
+
+    public List<EntityDefinition> getAllEntities() {
+        return entityCache.values().stream()
+                .map(entity -> EntityDefinition.builder()
+                        .entityMetadata(entity)
+                        .fields(new ArrayList<>(fieldCache.getOrDefault(entity.getLogicalName(), Collections.emptyMap()).values()))
+                        .relationships(new ArrayList<>(relationshipCache.getOrDefault(entity.getLogicalName(), Collections.emptyList())))
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public Map<String, List<String>> getComparators() {
+        return Map.of(
+            "string", Arrays.asList("equals", "notEquals", "like", "in", "notIn", "isNull", "isNotNull"),
+            "number", Arrays.asList("equals", "notEquals", "greaterThan", "lessThan", "greaterOrEqual", "lessOrEqual", "between", "in", "isNull", "isNotNull"),
+            "date", Arrays.asList("equals", "notEquals", "greaterThan", "lessThan", "greaterOrEqual", "lessOrEqual", "between", "isNull", "isNotNull"),
+            "timestamp", Arrays.asList("equals", "notEquals", "greaterThan", "lessThan", "greaterOrEqual", "lessOrEqual", "isNull", "isNotNull")
+        );
     }
 }
