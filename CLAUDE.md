@@ -152,6 +152,13 @@ Where: domain/engine/filter/
 8. Tests written BEFORE implementation (TDD)
 → RED → GREEN → REFACTOR, always
 
+9. Validation collects ALL errors before returning
+   → QueryValidator NEVER fails fast on first error
+   → Returns complete error list in ValidationResponse with HTTP 400
+
+10. maxResults must be positive if provided
+    → Validated before SQL generation
+    → Generates FETCH FIRST N ROWS ONLY clause when present
 
 ---
 
@@ -206,10 +213,12 @@ No hardcoding: all table/column names from metadata
 ---
 
 ## API Endpoints
-POST /api/query/build → generate SQL from query spec
-POST /api/query/validate → validate spec, return structured errors
-GET /api/metadata/entities → list all entities with fields
-GET /api/metadata/comparators → list comparators by data type
+POST /api/query/build      → generate SQL from query spec
+POST /api/query/validate   → validate spec, return structured errors
+POST /api/query/execute    → generate + run SQL, return actual rows (bonus)
+GET  /api/metadata/entities    → list all entities with fields
+GET  /api/metadata/comparators → list comparators by data type
+POST /api/metadata/reload      → clear and reload metadata cache (bonus)
 
 ---
 
@@ -287,6 +296,108 @@ Last completed:  [PASTE LAST COMPLETED STORY HERE]
 
 - Root entity for all queries: TRANSACTION
   Reason: all relationships originate from or pass through TRANSACTION
+
+- Hexagonal architecture strictly enforced
+  Reason: domain layer has zero Spring/JPA imports; testable in isolation
+
+- BFS used in JoinResolver (not DFS)
+  Reason: shortest JOIN path first; deterministic output for same input
+
+- ComparatorStrategy per comparator (not switch/if-else)
+  Reason: Open/Closed principle; new comparator = new class, zero existing changes
+
+- Root entity for queries is always TRANSACTION when present
+  Reason: all FK relationships originate from or pass through TRANSACTION
+
+- FETCH FIRST N ROWS ONLY for pagination (Oracle-compatible H2 syntax)
+  Reason: MODE=Oracle makes this valid; consistent with Oracle target dialect
+
+- SELECT * never generated
+  Reason: only explicitly requested fields appear in SELECT clause
+
+## Metadata Schema (DDL Reference)
+
+```sql
+CREATE TABLE META_ENTITY (
+    ENTITY_ID      NUMBER PRIMARY KEY,
+    ENTITY_NAME    VARCHAR2(50)  NOT NULL UNIQUE,  -- logical: 'transaction'
+    PHYSICAL_TABLE VARCHAR2(50)  NOT NULL,          -- physical: 'TRANSACTION'
+    DEFAULT_ALIAS  VARCHAR2(10)  NOT NULL,          -- SQL alias: 't'
+    DESCRIPTION    VARCHAR2(200)
+);
+
+CREATE TABLE META_COLUMN (
+    COLUMN_ID         NUMBER PRIMARY KEY,
+    ENTITY_ID         NUMBER NOT NULL REFERENCES META_ENTITY(ENTITY_ID),
+    LOGICAL_NAME      VARCHAR2(50) NOT NULL,   -- camelCase: 'txnDate'
+    PHYSICAL_NAME     VARCHAR2(50) NOT NULL,   -- SNAKE_CASE: 'TXN_DATE'
+    DATA_TYPE         VARCHAR2(20) NOT NULL,   -- 'string'|'number'|'date'|'timestamp'
+    IS_PK             NUMBER(1) DEFAULT 0,
+    IS_FK             NUMBER(1) DEFAULT 0,
+    FK_TARGET_ENTITY  VARCHAR2(50),
+    FK_TARGET_COLUMN  VARCHAR2(50),
+    IS_FILTERABLE     NUMBER(1) DEFAULT 1,
+    IS_SELECTABLE     NUMBER(1) DEFAULT 1
+);
+
+CREATE TABLE META_RELATIONSHIP (
+    REL_ID         NUMBER PRIMARY KEY,
+    SOURCE_ENTITY  VARCHAR2(50) NOT NULL,   -- 'transaction'
+    SOURCE_COLUMN  VARCHAR2(50) NOT NULL,   -- 'instrumentId'
+    TARGET_ENTITY  VARCHAR2(50) NOT NULL,   -- 'instrument'
+    TARGET_COLUMN  VARCHAR2(50) NOT NULL,   -- 'instrumentId'
+    JOIN_TYPE      VARCHAR2(10) NOT NULL,   -- 'LEFT'
+    RELATION_ALIAS VARCHAR2(50) NOT NULL    -- 'instrument'|'counterparty'|'issuer'
+);
+
+CREATE TABLE META_COMPARATOR_TYPE (
+    DATA_TYPE  VARCHAR2(20) NOT NULL,
+    COMPARATOR VARCHAR2(30) NOT NULL,
+    PRIMARY KEY (DATA_TYPE, COMPARATOR)
+);
+```
+
+## Testing Requirements
+
+### Unit Tests (JUnit 5 + Mockito)
+- `FilterProcessorTest` — nested AND/OR groups, all comparator types, empty filters
+- `JoinResolverTest` — single entity (no join), two entities, three entities,
+  counterparty vs issuer disambiguation
+- `ComparatorStrategyFactoryTest` — all valid mappings, unknown comparator throws
+- `QueryValidatorTest` — unknown entity, non-filterable field, type mismatch,
+  between with wrong value count, full error list returned (not just first)
+
+### Integration Tests (Spring Boot Test + MockMvc)
+- `QueryBuildIntegrationTest` — full happy path from HTTP request to SQL response
+- `QueryValidationIntegrationTest` — invalid request returns 400 with full error list
+- `MetadataIntegrationTest` — GET /api/metadata/entities returns all 3 entities
+
+## 4. Add Commit Strategy section
+
+Add this new section before **AI Interaction Rules**:
+
+## Commit Strategy
+
+Each commit must be atomic and reflect a single logical step:
+
+1.  `chore: project scaffold, dependencies, H2 config`
+2.  `feat: DDL schema for data tables and metadata tables`
+3.  `feat: seed data — PARTY, INSTRUMENT, TRANSACTION, metadata rows`
+4.  `feat: metadata domain model and repository port`
+5.  `feat: JpaMetadataRepository and MetadataService with cache`
+6.  `feat: NameMapper and ComparatorStrategyFactory`
+7.  `feat: QueryValidator — collect all errors before returning`
+8.  `feat: FilterProcessor — recursive Composite tree to SQL`
+9.  `feat: JoinResolver — BFS automatic JOIN path resolution`
+10. `feat: SqlBuilder / QueryAssembler — final SQL construction`
+11. `feat: QueryEngine — orchestrates validate → resolve → build`
+12. `feat: QueryController and MetadataController`
+13. `feat: GlobalExceptionHandler`
+14. `test: unit tests for engine components`
+15. `test: integration tests for API endpoints`
+16. `feat(bonus): execute endpoint with NamedParameterJdbcTemplate`
+17. `feat(bonus): metadata reload endpoint`
+18. `docs: README with setup, design decisions, AI usage`
 
 ## AI Interaction Rules
 1. ALWAYS read this file before generating any code
