@@ -399,6 +399,23 @@ Each commit must be atomic and reflect a single logical step:
 17. `feat(bonus): metadata reload endpoint`
 18. `docs: README with setup, design decisions, AI usage`
 
+## AI Assistance Layout
+
+All AI assistance assets live under `.ai/`:
+
+- `.ai/agents/`  — agent definitions (one `.md` file per agent)
+- `.ai/skills/<skill-name>/SKILL.md` — reusable skills (one folder per skill)
+- `.ai/commands/` — custom slash commands / prompt templates
+- `.ai/mcp.json` — Model Context Protocol server configuration
+
+Conventions:
+- Skill files are named `SKILL.md` inside their named folder.
+- Agent files follow `<agent-name>.md`.
+- MCP servers are added to `.ai/mcp.json` under `mcpServers`.
+
+Every artifact in `.ai/` must respect the architecture, strict rules, and
+naming conventions defined in this file.
+
 ## AI Interaction Rules
 1. ALWAYS read this file before generating any code
 2. NEVER change architecture decisions defined here
