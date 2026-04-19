@@ -16,8 +16,8 @@ public class JpaMetaColumn {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "TABLE_ID", nullable = false)
-    private JpaMetaTable metaTable;
+    @JoinColumn(name = "ENTITY_ID", nullable = false)
+    private JpaMetaEntity metaEntity;
 
     @Column(name = "LOGICAL_NAME", nullable = false)
     private String logicalName;
@@ -34,11 +34,11 @@ public class JpaMetaColumn {
     @Column(name = "IS_FK", nullable = false)
     private Integer isFk;
 
-    @Column(name = "FK_TABLE")
-    private String fkTable;
+    @Column(name = "FK_TARGET_ENTITY")
+    private String fkTargetEntity;
 
-    @Column(name = "FK_COLUMN")
-    private String fkColumn;
+    @Column(name = "FK_TARGET_COLUMN")
+    private String fkTargetColumn;
 
     @Column(name = "IS_FILTERABLE", nullable = false)
     private Integer isFilterable;

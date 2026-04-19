@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface MetaRelationshipRepository extends JpaRepository<JpaMetaRelationship, Long> {
-    List<JpaMetaRelationship> findAllBySourceTableId(Long sourceTableId);
+    List<JpaMetaRelationship> findAllBySourceEntityId(Long sourceEntityId);
 }

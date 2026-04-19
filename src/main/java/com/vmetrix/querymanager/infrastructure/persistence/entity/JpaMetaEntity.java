@@ -6,20 +6,20 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "META_TABLE")
+@Table(name = "META_ENTITY")
 @Getter
 @Setter
-public class JpaMetaTable {
+public class JpaMetaEntity {
 
     @Id
-    @Column(name = "TABLE_ID")
+    @Column(name = "ENTITY_ID")
     private Long id;
 
-    @Column(name = "LOGICAL_NAME", nullable = false, unique = true)
-    private String logicalName;
+    @Column(name = "ENTITY_NAME", nullable = false, unique = true)
+    private String entityName;
 
-    @Column(name = "PHYSICAL_NAME", nullable = false)
-    private String physicalName;
+    @Column(name = "PHYSICAL_TABLE", nullable = false)
+    private String physicalTable;
 
     @Column(name = "DEFAULT_ALIAS", nullable = false)
     private String defaultAlias;

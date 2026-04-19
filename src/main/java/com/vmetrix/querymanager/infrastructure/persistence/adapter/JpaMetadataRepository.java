@@ -6,7 +6,7 @@ import com.vmetrix.querymanager.domain.model.RelationshipMetadata;
 import com.vmetrix.querymanager.domain.port.MetadataRepository;
 import com.vmetrix.querymanager.infrastructure.persistence.repository.MetaColumnRepository;
 import com.vmetrix.querymanager.infrastructure.persistence.repository.MetaRelationshipRepository;
-import com.vmetrix.querymanager.infrastructure.persistence.repository.MetaTableRepository;
+import com.vmetrix.querymanager.infrastructure.persistence.repository.MetaEntityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -20,16 +20,16 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class JpaMetadataRepository implements MetadataRepository {
 
-    private final MetaTableRepository tableRepo;
+    private final MetaEntityRepository entityRepo;
     private final MetaColumnRepository columnRepo;
     private final MetaRelationshipRepository relationshipRepo;
 
     @Override
     public List<EntityMetadata> findAllEntities() {
-        return tableRepo.findAll().stream()
+        return entityRepo.findAll().stream()
                 .map(jpa -> EntityMetadata.builder()
-                        .logicalName(jpa.getLogicalName())
-                        .physicalName(jpa.getPhysicalName())
+                        .logicalName(jpa.getEntityName())
+                        .physicalName(jpa.getPhysicalTable())
                         .defaultAlias(jpa.getDefaultAlias())
                         .description(jpa.getDescription())
                         .build())
@@ -40,14 +40,14 @@ public class JpaMetadataRepository implements MetadataRepository {
     public List<FieldMetadata> findAllFields() {
         return columnRepo.findAll().stream()
                 .map(jpa -> FieldMetadata.builder()
-                        .entityLogicalName(jpa.getMetaTable().getLogicalName())
+                        .entityLogicalName(jpa.getMetaEntity().getEntityName())
                         .logicalName(jpa.getLogicalName())
                         .physicalName(jpa.getPhysicalName())
                         .dataType(jpa.getDataType())
                         .isPk(jpa.getIsPk() != null && jpa.getIsPk() == 1)
                         .isFk(jpa.getIsFk() != null && jpa.getIsFk() == 1)
-                        .fkEntity(jpa.getFkTable())
-                        .fkColumn(jpa.getFkColumn())
+                        .fkEntity(jpa.getFkTargetEntity())
+                        .fkColumn(jpa.getFkTargetColumn())
                         .isFilterable(jpa.getIsFilterable() != null && jpa.getIsFilterable() == 1)
                         .isSelectable(jpa.getIsSelectable() != null && jpa.getIsSelectable() == 1)
                         .build())
@@ -58,9 +58,9 @@ public class JpaMetadataRepository implements MetadataRepository {
     public List<RelationshipMetadata> findAllRelationships() {
         return relationshipRepo.findAll().stream()
                 .map(jpa -> RelationshipMetadata.builder()
-                        .sourceEntity(jpa.getSourceTable().getLogicalName())
+                        .sourceEntity(jpa.getSourceEntity().getEntityName())
                         .sourceColumn(jpa.getSourceColumn())
-                        .targetEntity(jpa.getTargetTable().getLogicalName())
+                        .targetEntity(jpa.getTargetEntity().getEntityName())
                         .targetColumn(jpa.getTargetColumn())
                         .joinType(jpa.getJoinType())
                         .relationAlias(jpa.getRelationAlias())

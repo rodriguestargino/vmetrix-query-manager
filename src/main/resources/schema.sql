@@ -63,33 +63,33 @@ CREATE TABLE TRANSACTION (
 -- METADATA TABLES
 -- =============================================================================
 
-CREATE TABLE META_TABLE (
-    TABLE_ID       NUMBER(19)    PRIMARY KEY,
-    LOGICAL_NAME   VARCHAR2(50)  NOT NULL UNIQUE, -- used in API requests (transaction, instrument, party)
-    PHYSICAL_NAME  VARCHAR2(50)  NOT NULL,        -- physical table name in DB (TRANSACTION, INSTRUMENT, PARTY)
+CREATE TABLE META_ENTITY (
+    ENTITY_ID      NUMBER(19)    PRIMARY KEY,
+    ENTITY_NAME    VARCHAR2(50)  NOT NULL UNIQUE, -- used in API requests (transaction, instrument, party)
+    PHYSICAL_TABLE VARCHAR2(50)  NOT NULL,        -- physical table name in DB (TRANSACTION, INSTRUMENT, PARTY)
     DEFAULT_ALIAS  VARCHAR2(10)  NOT NULL,        -- SQL alias used in generated queries (t, i, p)
     DESCRIPTION    VARCHAR2(200)
 );
 
 CREATE TABLE META_COLUMN (
-    COLUMN_ID      NUMBER(19)    PRIMARY KEY,
-    TABLE_ID       NUMBER(19)    NOT NULL REFERENCES META_TABLE(TABLE_ID),
-    LOGICAL_NAME   VARCHAR2(50)  NOT NULL, -- camelCase name used in API (txnDate, partyName)
-    PHYSICAL_NAME  VARCHAR2(50)  NOT NULL, -- SNAKE_CASE column name in DB (TXN_DATE, PARTY_NAME)
-    DATA_TYPE      VARCHAR2(20)  NOT NULL, -- string, number, date, timestamp
-    IS_PK          NUMBER(1)     NOT NULL, -- 1 = primary key, 0 = not
-    IS_FK          NUMBER(1)     NOT NULL, -- 1 = foreign key, 0 = not
-    FK_TABLE       VARCHAR2(50),
-    FK_COLUMN      VARCHAR2(50),
-    IS_FILTERABLE  NUMBER(1)     NOT NULL, -- 1 = can be used in WHERE clause
-    IS_SELECTABLE  NUMBER(1)     NOT NULL  -- 1 = can be used in SELECT clause
+    COLUMN_ID         NUMBER(19)    PRIMARY KEY,
+    ENTITY_ID         NUMBER(19)    NOT NULL REFERENCES META_ENTITY(ENTITY_ID),
+    LOGICAL_NAME      VARCHAR2(50)  NOT NULL, -- camelCase name used in API (txnDate, partyName)
+    PHYSICAL_NAME     VARCHAR2(50)  NOT NULL, -- SNAKE_CASE column name in DB (TXN_DATE, PARTY_NAME)
+    DATA_TYPE         VARCHAR2(20)  NOT NULL, -- string, number, date, timestamp
+    IS_PK             NUMBER(1)     NOT NULL, -- 1 = primary key, 0 = not
+    IS_FK             NUMBER(1)     NOT NULL, -- 1 = foreign key, 0 = not
+    FK_TARGET_ENTITY  VARCHAR2(50),           -- Name of the target entity (not table)
+    FK_TARGET_COLUMN  VARCHAR2(50),           -- Name of the target logical column
+    IS_FILTERABLE     NUMBER(1)     NOT NULL, -- 1 = can be used in WHERE clause
+    IS_SELECTABLE     NUMBER(1)     NOT NULL  -- 1 = can be used in SELECT clause
 );
 
 CREATE TABLE META_RELATIONSHIP (
     REL_ID              NUMBER(19)    PRIMARY KEY,
-    SOURCE_TABLE_ID     NUMBER(19)    NOT NULL REFERENCES META_TABLE(TABLE_ID),
+    SOURCE_ENTITY_ID    NUMBER(19)    NOT NULL REFERENCES META_ENTITY(ENTITY_ID),
     SOURCE_COLUMN       VARCHAR2(50)  NOT NULL, -- FK column on source table
-    TARGET_TABLE_ID     NUMBER(19)    NOT NULL REFERENCES META_TABLE(TABLE_ID),
+    TARGET_ENTITY_ID    NUMBER(19)    NOT NULL REFERENCES META_ENTITY(ENTITY_ID),
     TARGET_COLUMN       VARCHAR2(50)  NOT NULL, -- PK column on target table
     JOIN_TYPE           VARCHAR2(20)  NOT NULL, -- LEFT JOIN, INNER JOIN
     RELATION_ALIAS      VARCHAR2(50)  NOT NULL  -- Alias used in API requests

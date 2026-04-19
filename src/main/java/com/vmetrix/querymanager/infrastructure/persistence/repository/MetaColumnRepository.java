@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface MetaColumnRepository extends JpaRepository<JpaMetaColumn, Long> {
-    List<JpaMetaColumn> findAllByMetaTableId(Long tableId);
+    List<JpaMetaColumn> findAllByMetaEntityId(Long entityId);
 }

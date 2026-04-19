@@ -327,34 +327,34 @@ Last completed:  [PASTE LAST COMPLETED STORY HERE]
 ```sql
 CREATE TABLE META_ENTITY (
     ENTITY_ID      NUMBER PRIMARY KEY,
-    ENTITY_NAME    VARCHAR2(50)  NOT NULL UNIQUE,  -- logical: 'transaction'
-    PHYSICAL_TABLE VARCHAR2(50)  NOT NULL,          -- physical: 'TRANSACTION'
-    DEFAULT_ALIAS  VARCHAR2(10)  NOT NULL,          -- SQL alias: 't'
+    ENTITY_NAME    VARCHAR2(50)  NOT NULL UNIQUE, -- logical: 'transaction'
+    PHYSICAL_TABLE VARCHAR2(50)  NOT NULL,        -- physical table: 'TRANSACTION'
+    DEFAULT_ALIAS  VARCHAR2(10)  NOT NULL,        -- SQL alias: 't'
     DESCRIPTION    VARCHAR2(200)
 );
 
 CREATE TABLE META_COLUMN (
     COLUMN_ID         NUMBER PRIMARY KEY,
     ENTITY_ID         NUMBER NOT NULL REFERENCES META_ENTITY(ENTITY_ID),
-    LOGICAL_NAME      VARCHAR2(50) NOT NULL,   -- camelCase: 'txnDate'
-    PHYSICAL_NAME     VARCHAR2(50) NOT NULL,   -- SNAKE_CASE: 'TXN_DATE'
-    DATA_TYPE         VARCHAR2(20) NOT NULL,   -- 'string'|'number'|'date'|'timestamp'
-    IS_PK             NUMBER(1) DEFAULT 0,
-    IS_FK             NUMBER(1) DEFAULT 0,
-    FK_TARGET_ENTITY  VARCHAR2(50),
-    FK_TARGET_COLUMN  VARCHAR2(50),
-    IS_FILTERABLE     NUMBER(1) DEFAULT 1,
-    IS_SELECTABLE     NUMBER(1) DEFAULT 1
+    LOGICAL_NAME      VARCHAR2(50)  NOT NULL, -- camelCase: 'txnDate'
+    PHYSICAL_NAME     VARCHAR2(50)  NOT NULL, -- SNAKE_CASE: 'TXN_DATE'
+    DATA_TYPE         VARCHAR2(20)  NOT NULL, -- 'string'|'number'|'date'|'timestamp'
+    IS_PK             NUMBER(1)     NOT NULL, -- 1 = primary key
+    IS_FK             NUMBER(1)     NOT NULL, -- 1 = foreign key
+    FK_TARGET_ENTITY  VARCHAR2(50),           -- Target entity name
+    FK_TARGET_COLUMN  VARCHAR2(50),           -- Target logical column name
+    IS_FILTERABLE     NUMBER(1)     NOT NULL, -- 1 = true
+    IS_SELECTABLE     NUMBER(1)     NOT NULL  -- 1 = true
 );
 
 CREATE TABLE META_RELATIONSHIP (
-    REL_ID         NUMBER PRIMARY KEY,
-    SOURCE_ENTITY  VARCHAR2(50) NOT NULL,   -- 'transaction'
-    SOURCE_COLUMN  VARCHAR2(50) NOT NULL,   -- 'instrumentId'
-    TARGET_ENTITY  VARCHAR2(50) NOT NULL,   -- 'instrument'
-    TARGET_COLUMN  VARCHAR2(50) NOT NULL,   -- 'instrumentId'
-    JOIN_TYPE      VARCHAR2(10) NOT NULL,   -- 'LEFT'
-    RELATION_ALIAS VARCHAR2(50) NOT NULL    -- 'instrument'|'counterparty'|'issuer'
+    REL_ID              NUMBER PRIMARY KEY,
+    SOURCE_ENTITY_ID    NUMBER NOT NULL REFERENCES META_ENTITY(ENTITY_ID),
+    SOURCE_COLUMN       VARCHAR2(50) NOT NULL, -- FK column name
+    TARGET_ENTITY_ID    NUMBER NOT NULL REFERENCES META_ENTITY(ENTITY_ID),
+    TARGET_COLUMN       VARCHAR2(50) NOT NULL, -- PK column name
+    JOIN_TYPE           VARCHAR2(20) NOT NULL, -- 'LEFT JOIN'|'INNER JOIN'
+    RELATION_ALIAS      VARCHAR2(50) NOT NULL  -- 'instrument'|'counterparty'|'issuer'
 );
 
 CREATE TABLE META_COMPARATOR_TYPE (

@@ -16,15 +16,15 @@ public class JpaMetaRelationship {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "SOURCE_TABLE_ID", nullable = false)
-    private JpaMetaTable sourceTable;
+    @JoinColumn(name = "SOURCE_ENTITY_ID", nullable = false)
+    private JpaMetaEntity sourceEntity;
 
     @Column(name = "SOURCE_COLUMN", nullable = false)
     private String sourceColumn;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "TARGET_TABLE_ID", nullable = false)
-    private JpaMetaTable targetTable;
+    @JoinColumn(name = "TARGET_ENTITY_ID", nullable = false)
+    private JpaMetaEntity targetEntity;
 
     @Column(name = "TARGET_COLUMN", nullable = false)
     private String targetColumn;
