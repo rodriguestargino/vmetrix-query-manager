@@ -1,6 +1,5 @@
 package com.vmetrix.querymanager.domain.engine.builder;
 
-import com.vmetrix.querymanager.application.service.MetadataService;
 import com.vmetrix.querymanager.domain.engine.filter.FilterResult;
 import com.vmetrix.querymanager.domain.engine.filter.FilterTreeRenderer;
 import com.vmetrix.querymanager.domain.engine.join.JoinNode;
@@ -11,6 +10,7 @@ import com.vmetrix.querymanager.domain.model.QueryResult;
 import com.vmetrix.querymanager.domain.model.SelectField;
 import com.vmetrix.querymanager.domain.model.SortDirection;
 import com.vmetrix.querymanager.domain.model.SortField;
+import com.vmetrix.querymanager.domain.port.MetadataCatalog;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 class QueryAssemblerTest {
 
     @Mock
-    private MetadataService metadataService;
+    private MetadataCatalog metadataService;
     @Mock
     private SelectClauseBuilder selectBuilder;
     @Mock

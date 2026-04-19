@@ -127,11 +127,11 @@ Follow Conventional Commits and include the Jira key.
 Examples:
 
 ```text
-feat(engine): SCRUM-44 add BFS join resolver for multi-entity queries
-fix(filter): SCRUM-55 correct BETWEEN parameter binding order
-test(builder): SCRUM-60 add SelectClauseBuilder unit tests
-refactor(metadata): SCRUM-70 extract field lookup to MetadataService
-docs(api): SCRUM-80 update OpenAPI annotations for query endpoint
+feat(engine): TC-44 add BFS join resolver for multi-entity queries
+fix(filter): TC-55 correct BETWEEN parameter binding order
+test(builder): TC-60 add SelectClauseBuilder unit tests
+refactor(metadata): TC-70 extract field lookup to MetadataService
+docs(api): TC-80 update OpenAPI annotations for query endpoint
 ```
 
 Keep commits scoped to one task or one subtask whenever practical.
@@ -139,7 +139,7 @@ Keep commits scoped to one task or one subtask whenever practical.
 ## Checklist Template
 
 ```markdown
-# Acceptance Criteria: [SCRUM-X] [Title]
+# Acceptance Criteria: [TC-X] [Title]
 - [ ] AC 1
 - [ ] AC 2
 - [ ] AC 3
@@ -159,7 +159,7 @@ Keep commits scoped to one task or one subtask whenever practical.
 
 ## vmetrix-query-manager Usage Example
 
-Scenario: Picking up `SCRUM-100` — "Add IS_NOT_NULL comparator strategy".
+Scenario: Picking up `TC-100` — "Add IS_NOT_NULL comparator strategy".
 
 1. Fetch the ticket and verify acceptance criteria.
 2. Build a checklist from the ACs.
@@ -169,5 +169,5 @@ Scenario: Picking up `SCRUM-100` — "Add IS_NOT_NULL comparator strategy".
 6. Implement `IsNotNullStrategy` implementing `ComparatorStrategy`.
 7. Register it in `ComparatorStrategyFactory`.
 8. Run `mvn test -Dtest=IsNotNullStrategyTest` — verify GREEN.
-9. Commit: `feat(filter): SCRUM-100 add IsNotNull comparator strategy`.
+9. Commit: `feat(filter): TC-100 add IsNotNull comparator strategy`.
 10. Add Jira approval comment and transition to `DONE`.

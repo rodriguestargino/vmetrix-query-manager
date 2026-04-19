@@ -1,8 +1,8 @@
 package com.vmetrix.querymanager.application.service;
 
-import com.vmetrix.querymanager.api.dto.request.QueryRequestDto;
-import com.vmetrix.querymanager.api.dto.response.QueryBuildResponse;
+import com.vmetrix.querymanager.domain.engine.builder.QuerySpecification;
+import com.vmetrix.querymanager.domain.model.QueryResult;
 
 public interface QueryService {
-    QueryBuildResponse buildQuery(QueryRequestDto requestDto);
+    QueryResult buildQuery(QuerySpecification spec);
 }

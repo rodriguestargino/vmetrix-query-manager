@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MetadataService {
+public class MetadataService implements com.vmetrix.querymanager.domain.port.MetadataCatalog {
 
     private final MetadataRepository metadataRepository;
 
@@ -85,6 +85,7 @@ public class MetadataService {
         }
     }
 
+    @Override
     public EntityMetadata findEntityByLogicalName(String logicalName) {
         EntityMetadata metadata = entityCache.get(logicalName);
         if (metadata == null) {
@@ -93,6 +94,7 @@ public class MetadataService {
         return metadata;
     }
 
+    @Override
     public EntityMetadata findEntityByAlias(String alias) {
         String targetEntity = aliasCache.get(alias);
         if (targetEntity != null) {
@@ -101,6 +103,7 @@ public class MetadataService {
         return findEntityByLogicalName(alias);
     }
 
+    @Override
     public FieldMetadata findField(String logicalEntityName, String logicalFieldName) {
         Map<String, FieldMetadata> fields = fieldCache.get(logicalEntityName);
         if (fields == null || !fields.containsKey(logicalFieldName)) {
@@ -109,10 +112,12 @@ public class MetadataService {
         return fields.get(logicalFieldName);
     }
 
+    @Override
     public List<RelationshipMetadata> findRelationships(String sourceLogicalEntityName) {
         return relationshipCache.getOrDefault(sourceLogicalEntityName, Collections.emptyList());
     }
 
+    @Override
     public List<EntityDefinition> getAllEntities() {
         return entityCache.values().stream()
                 .map(entity -> EntityDefinition.builder()
@@ -123,6 +128,7 @@ public class MetadataService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public Map<String, List<String>> getComparators() {
         return Map.of(
             "string", Arrays.asList("equals", "notEquals", "like", "in", "notIn", "isNull", "isNotNull"),

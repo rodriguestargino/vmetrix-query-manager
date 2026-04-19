@@ -5,9 +5,13 @@ import com.vmetrix.querymanager.api.dto.response.QueryBuildResponse;
 import com.vmetrix.querymanager.api.dto.response.ValidationErrorDto;
 import com.vmetrix.querymanager.api.dto.response.ValidationResponse;
 import com.vmetrix.querymanager.api.exception.ErrorResponse;
+import com.vmetrix.querymanager.api.mapper.QueryBuildResponseMapper;
+import com.vmetrix.querymanager.api.mapper.QueryRequestMapper;
 import com.vmetrix.querymanager.api.mapper.ValidationErrorMapper;
 import com.vmetrix.querymanager.application.service.QueryService;
 import com.vmetrix.querymanager.application.service.QueryValidator;
+import com.vmetrix.querymanager.domain.engine.builder.QuerySpecification;
+import com.vmetrix.querymanager.domain.model.QueryResult;
 import com.vmetrix.querymanager.domain.model.ValidationError;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -96,6 +100,8 @@ public class QueryController {
 
     private final QueryService queryService;
     private final QueryValidator queryValidator;
+    private final QueryRequestMapper queryRequestMapper;
+    private final QueryBuildResponseMapper queryBuildResponseMapper;
     private final ValidationErrorMapper validationErrorMapper;
 
     @PostMapping("/build")
@@ -122,9 +128,9 @@ public class QueryController {
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = QueryBuildResponse.class),
                             examples = @ExampleObject(
-                                    name = "specSection5-1Response",
-                                    summary = "Generated SQL for spec §5.1 request",
-                                    value = BUILD_RESPONSE_EXAMPLE))),
+                                     name = "specSection5-1Response",
+                                     summary = "Generated SQL for spec §5.1 request",
+                                     value = BUILD_RESPONSE_EXAMPLE))),
             @ApiResponse(responseCode = "400",
                     description = "Malformed request or unknown entity / field / comparator",
                     content = @Content(
@@ -138,7 +144,9 @@ public class QueryController {
                             schema = @Schema(implementation = ErrorResponse.class)))
     })
     public ResponseEntity<QueryBuildResponse> buildQuery(@Valid @RequestBody QueryRequestDto request) {
-        return ResponseEntity.ok(queryService.buildQuery(request));
+        QuerySpecification spec = queryRequestMapper.toDomain(request);
+        QueryResult result = queryService.buildQuery(spec);
+        return ResponseEntity.ok(queryBuildResponseMapper.toDto(result));
     }
 
     @PostMapping("/validate")
@@ -173,7 +181,8 @@ public class QueryController {
                             examples = @ExampleObject(value = VALIDATE_INVALID_RESPONSE_EXAMPLE)))
     })
     public ResponseEntity<ValidationResponse> validateQuery(@Valid @RequestBody QueryRequestDto request) {
-        List<ValidationError> errors = queryValidator.validate(request);
+        QuerySpecification spec = queryRequestMapper.toDomain(request);
+        List<ValidationError> errors = queryValidator.validate(spec);
         if (errors.isEmpty()) {
             return ResponseEntity.ok(ValidationResponse.builder().valid(true).build());
         }

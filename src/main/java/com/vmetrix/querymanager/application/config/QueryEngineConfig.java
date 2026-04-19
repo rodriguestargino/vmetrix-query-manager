@@ -1,6 +1,6 @@
 package com.vmetrix.querymanager.application.config;
 
-import com.vmetrix.querymanager.application.service.MetadataService;
+import com.vmetrix.querymanager.domain.port.MetadataCatalog;
 import com.vmetrix.querymanager.domain.engine.builder.FromClauseBuilder;
 import com.vmetrix.querymanager.domain.engine.builder.OrderByClauseBuilder;
 import com.vmetrix.querymanager.domain.engine.builder.QueryAssembler;
@@ -20,7 +20,7 @@ public class QueryEngineConfig {
     }
 
     @Bean
-    public FromClauseBuilder fromClauseBuilder(MetadataService metadataService) {
+    public FromClauseBuilder fromClauseBuilder(MetadataCatalog metadataService) {
         return new FromClauseBuilder(metadataService);
     }
 
@@ -45,7 +45,7 @@ public class QueryEngineConfig {
     }
 
     @Bean
-    public QueryAssembler queryAssembler(MetadataService metadataService,
+    public QueryAssembler queryAssembler(MetadataCatalog metadataService,
                                          SelectClauseBuilder selectClauseBuilder,
                                          FromClauseBuilder fromClauseBuilder,
                                          OrderByClauseBuilder orderByClauseBuilder,

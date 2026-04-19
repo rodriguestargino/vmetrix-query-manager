@@ -1,6 +1,6 @@
 package com.vmetrix.querymanager.domain.engine.builder;
 
-import com.vmetrix.querymanager.application.service.MetadataService;
+import com.vmetrix.querymanager.domain.port.MetadataCatalog;
 import com.vmetrix.querymanager.domain.engine.filter.FilterResult;
 import com.vmetrix.querymanager.domain.engine.filter.FilterTreeRenderer;
 import com.vmetrix.querymanager.domain.engine.join.JoinNode;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class QueryAssembler {
 
-    private final MetadataService metadataService;
+    private final MetadataCatalog metadataService;
     private final SelectClauseBuilder selectBuilder;
     private final FromClauseBuilder fromBuilder;
     private final OrderByClauseBuilder orderByBuilder;

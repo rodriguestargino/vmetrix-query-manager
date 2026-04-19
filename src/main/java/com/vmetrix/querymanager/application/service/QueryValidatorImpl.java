@@ -1,14 +1,8 @@
 package com.vmetrix.querymanager.application.service;
 
-import com.vmetrix.querymanager.api.dto.request.FilterConditionDto;
-import com.vmetrix.querymanager.api.dto.request.FilterGroupDto;
-import com.vmetrix.querymanager.api.dto.request.FilterNodeDto;
-import com.vmetrix.querymanager.api.dto.request.QueryRequestDto;
-import com.vmetrix.querymanager.api.dto.request.SelectFieldDto;
-import com.vmetrix.querymanager.api.dto.request.SortFieldDto;
-import com.vmetrix.querymanager.domain.model.EntityMetadata;
-import com.vmetrix.querymanager.domain.model.FieldMetadata;
-import com.vmetrix.querymanager.domain.model.ValidationError;
+import com.vmetrix.querymanager.domain.engine.builder.QuerySpecification;
+import com.vmetrix.querymanager.domain.model.*;
+import com.vmetrix.querymanager.domain.port.MetadataCatalog;
 import com.vmetrix.querymanager.shared.exception.UnknownEntityException;
 import com.vmetrix.querymanager.shared.exception.UnknownFieldException;
 import lombok.RequiredArgsConstructor;
@@ -22,16 +16,16 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class QueryValidatorImpl implements QueryValidator {
 
-    private final MetadataService metadataService;
+    private final MetadataCatalog metadataService;
 
     @Override
-    public List<ValidationError> validate(QueryRequestDto request) {
+    public List<ValidationError> validate(QuerySpecification spec) {
         List<ValidationError> errors = new ArrayList<>();
         Map<String, List<String>> comparators = metadataService.getComparators();
 
         // Validate selects
-        if (request.getSelect() != null) {
-            for (SelectFieldDto select : request.getSelect()) {
+        if (spec.getSelectFields() != null) {
+            for (SelectField select : spec.getSelectFields()) {
                 try {
                     EntityMetadata em = metadataService.findEntityByAlias(select.getEntity());
                     FieldMetadata fieldMeta = metadataService.findField(em.getLogicalName(), select.getField());
@@ -58,13 +52,13 @@ public class QueryValidatorImpl implements QueryValidator {
         }
 
         // Validate filters
-        if (request.getFilters() != null) {
-            validateFilterNode(request.getFilters(), errors, comparators);
+        if (spec.getFilterBaseNode() != null) {
+            validateFilterNode(spec.getFilterBaseNode(), errors, comparators);
         }
 
         // Validate sorting
-        if (request.getSorting() != null) {
-            for (SortFieldDto sort : request.getSorting()) {
+        if (spec.getSortFields() != null) {
+            for (SortField sort : spec.getSortFields()) {
                 try {
                     EntityMetadata em = metadataService.findEntityByAlias(sort.getEntity());
                     metadataService.findField(em.getLogicalName(), sort.getField());
@@ -86,14 +80,14 @@ public class QueryValidatorImpl implements QueryValidator {
         return errors;
     }
 
-    private void validateFilterNode(FilterNodeDto node, List<ValidationError> errors, Map<String, List<String>> comparators) {
-        if (node instanceof FilterGroupDto group) {
+    private void validateFilterNode(FilterNode node, List<ValidationError> errors, Map<String, List<String>> comparators) {
+        if (node instanceof FilterGroup group) {
             if (group.getConditions() != null) {
-                for (FilterNodeDto child : group.getConditions()) {
+                for (FilterNode child : group.getConditions()) {
                     validateFilterNode(child, errors, comparators);
                 }
             }
-        } else if (node instanceof FilterConditionDto condition) {
+        } else if (node instanceof FilterCondition condition) {
             try {
                 EntityMetadata em = metadataService.findEntityByAlias(condition.getEntity());
                 FieldMetadata fieldMeta = metadataService.findField(em.getLogicalName(), condition.getField());

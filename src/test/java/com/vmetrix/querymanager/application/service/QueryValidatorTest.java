@@ -1,14 +1,8 @@
 package com.vmetrix.querymanager.application.service;
 
-import com.vmetrix.querymanager.api.dto.request.FilterConditionDto;
-import com.vmetrix.querymanager.api.dto.request.FilterGroupDto;
-import com.vmetrix.querymanager.api.dto.request.QueryRequestDto;
-import com.vmetrix.querymanager.api.dto.request.SelectFieldDto;
-import com.vmetrix.querymanager.api.dto.request.SortDirectionDto;
-import com.vmetrix.querymanager.api.dto.request.SortFieldDto;
-import com.vmetrix.querymanager.domain.model.EntityMetadata;
-import com.vmetrix.querymanager.domain.model.FieldMetadata;
-import com.vmetrix.querymanager.domain.model.ValidationError;
+import com.vmetrix.querymanager.domain.engine.builder.QuerySpecification;
+import com.vmetrix.querymanager.domain.model.*;
+import com.vmetrix.querymanager.domain.port.MetadataCatalog;
 import com.vmetrix.querymanager.shared.exception.UnknownEntityException;
 import com.vmetrix.querymanager.shared.exception.UnknownFieldException;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,17 +14,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class QueryValidatorTest {
 
     @Mock
-    private MetadataService metadataService;
+    private MetadataCatalog metadataService;
 
     @InjectMocks
     private QueryValidatorImpl queryValidator;
@@ -38,7 +31,7 @@ class QueryValidatorTest {
     @BeforeEach
     void setUp() {
         when(metadataService.getComparators()).thenReturn(
-                java.util.Map.of(
+                Map.of(
                         "string", Arrays.asList("equals", "notEquals"),
                         "number", Arrays.asList("equals", "greaterThan")
                 )
@@ -48,34 +41,39 @@ class QueryValidatorTest {
     @Test
     void should_collect_multiple_errors_in_one_pass() {
         // Arrange
-        QueryRequestDto req = new QueryRequestDto();
+        SelectField s1 = SelectField.builder()
+                .entity("transaction")
+                .field("nonSelectableField")
+                .build();
         
-        SelectFieldDto s1 = new SelectFieldDto();
-        s1.setEntity("transaction");
-        s1.setField("nonSelectableField");
+        SelectField s2 = SelectField.builder()
+                .entity("unknown_entity")
+                .field("foo")
+                .build();
         
-        SelectFieldDto s2 = new SelectFieldDto();
-        s2.setEntity("unknown_entity");
-        s2.setField("foo");
+        FilterCondition f1 = FilterCondition.builder()
+                .entity("transaction")
+                .field("status")
+                .comparator("greaterThan") // valid for number, but status is string
+                .value("SETTLED")
+                .build();
         
-        req.setSelect(Arrays.asList(s1, s2));
-        
-        FilterConditionDto f1 = new FilterConditionDto();
-        f1.setEntity("transaction");
-        f1.setField("status");
-        f1.setComparator("greaterThan"); // valid for number, but status is string
-        f1.setValue("SETTLED");
-        
-        FilterGroupDto group = new FilterGroupDto();
-        group.setOperator("AND");
-        group.setConditions(Arrays.asList(f1));
-        req.setFilters(group);
+        FilterGroup group = FilterGroup.builder()
+                .operator("AND")
+                .conditions(Arrays.asList(f1))
+                .build();
 
-        SortFieldDto sort1 = new SortFieldDto();
-        sort1.setEntity("transaction");
-        sort1.setField("unknown_field");
-        sort1.setDirection(SortDirectionDto.ASC);
-        req.setSorting(Arrays.asList(sort1));
+        SortField sort1 = SortField.builder()
+                .entity("transaction")
+                .field("unknown_field")
+                .direction(SortDirection.ASC)
+                .build();
+
+        QuerySpecification spec = QuerySpecification.builder()
+                .selectFields(Arrays.asList(s1, s2))
+                .filterBaseNode(group)
+                .sortFields(Arrays.asList(sort1))
+                .build();
 
         // Mock behaviors
         when(metadataService.findEntityByAlias("transaction")).thenReturn(
@@ -91,7 +89,7 @@ class QueryValidatorTest {
         when(metadataService.findField("transaction", "unknown_field")).thenThrow(new UnknownFieldException("transaction", "unknown_field"));
 
         // Act
-        List<ValidationError> errors = queryValidator.validate(req);
+        List<ValidationError> errors = queryValidator.validate(spec);
 
         // Assert
         assertThat(errors).hasSize(4);
@@ -105,18 +103,21 @@ class QueryValidatorTest {
     @Test
     void should_return_error_for_non_filterable_field() {
         // Arrange
-        QueryRequestDto req = new QueryRequestDto();
+        FilterCondition f1 = FilterCondition.builder()
+                .entity("transaction")
+                .field("instrumentId")
+                .comparator("equals")
+                .value("123")
+                .build();
         
-        FilterConditionDto f1 = new FilterConditionDto();
-        f1.setEntity("transaction");
-        f1.setField("instrumentId");
-        f1.setComparator("equals");
-        f1.setValue("123");
-        
-        FilterGroupDto group = new FilterGroupDto();
-        group.setOperator("AND");
-        group.setConditions(Arrays.asList(f1));
-        req.setFilters(group);
+        FilterGroup group = FilterGroup.builder()
+                .operator("AND")
+                .conditions(Arrays.asList(f1))
+                .build();
+
+        QuerySpecification spec = QuerySpecification.builder()
+                .filterBaseNode(group)
+                .build();
 
         when(metadataService.findEntityByAlias("transaction")).thenReturn(
                 EntityMetadata.builder().logicalName("transaction").build());
@@ -124,7 +125,7 @@ class QueryValidatorTest {
                 FieldMetadata.builder().logicalName("instrumentId").dataType("number").isFilterable(false).build());
 
         // Act
-        List<ValidationError> errors = queryValidator.validate(req);
+        List<ValidationError> errors = queryValidator.validate(spec);
 
         // Assert
         assertThat(errors).hasSize(1);
