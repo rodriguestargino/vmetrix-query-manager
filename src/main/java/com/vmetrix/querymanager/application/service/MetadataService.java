@@ -37,6 +37,9 @@ public class MetadataService {
     // source logical entity name -> List<RelationshipMetadata>
     private final Map<String, List<RelationshipMetadata>> relationshipCache = new ConcurrentHashMap<>();
 
+    // alias -> target logical entity name
+    private final Map<String, String> aliasCache = new ConcurrentHashMap<>();
+
     @PostConstruct
     public void initCache() {
         log.info("Loading metadata cache...");
@@ -44,6 +47,7 @@ public class MetadataService {
         entityCache.clear();
         fieldCache.clear();
         relationshipCache.clear();
+        aliasCache.clear();
 
         // 1. Load entities
         List<EntityMetadata> entities = metadataRepository.findAllEntities();
@@ -69,8 +73,16 @@ public class MetadataService {
                 .collect(Collectors.groupingBy(RelationshipMetadata::getSourceEntity));
         relationshipCache.putAll(groupedRels);
 
-        log.info("Metadata cache loaded. Entities: {}, Fields: {}, Relationships: {}", 
-                entities.size(), fields.size(), relationships.size());
+        // 4. Load aliases
+        for (RelationshipMetadata rel : relationships) {
+            aliasCache.put(rel.getRelationAlias(), rel.getTargetEntity());
+        }
+
+        log.info("Metadata cache loaded. Entities: {}, Fields: {}, Relationships: {}, Aliases: {}", 
+                entities.size(), fields.size(), relationships.size(), aliasCache.size());
+        if (log.isDebugEnabled()) {
+             aliasCache.forEach((k, v) -> log.debug("Alias mapping: {} -> {}", k, v));
+        }
     }
 
     public EntityMetadata findEntityByLogicalName(String logicalName) {
@@ -79,6 +91,14 @@ public class MetadataService {
             throw new UnknownEntityException(logicalName);
         }
         return metadata;
+    }
+
+    public EntityMetadata findEntityByAlias(String alias) {
+        String targetEntity = aliasCache.get(alias);
+        if (targetEntity != null) {
+            return findEntityByLogicalName(targetEntity);
+        }
+        return findEntityByLogicalName(alias);
     }
 
     public FieldMetadata findField(String logicalEntityName, String logicalFieldName) {
