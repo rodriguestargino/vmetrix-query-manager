@@ -31,10 +31,6 @@ public class QueryAssembler {
     private final FilterTreeRenderer filterTreeRenderer;
 
     public QueryResult assemble(QuerySpecification spec) {
-        // 1. SELECT clause
-        String selectClause = selectBuilder.build(spec.getSelectFields());
-        int columnCount = spec.getSelectFields() != null ? spec.getSelectFields().size() : 0;
-
         // 2. FROM clause
         String fromClause = fromBuilder.build(spec.getBaseEntity());
 
@@ -42,21 +38,17 @@ public class QueryAssembler {
         List<RelationshipMetadata> allRelationships = new ArrayList<>();
         Map<String, EntityMetadata> entityMap = new HashMap<>();
         
-        // This is a bit inefficient if we load everything, but we need it for JoinResolver.
-        // Let's populate entityMap for needed entities and get all relationships for the base ones.
-        for (String entityName : spec.getAllRequestedAliases()) {
-            try {
-                // If the name is actually a relation alias, we might not find it directly, but let's assume JoinResolver 
-                // deals with finding the target entity. Actually JoinResolver expects entityMap to have logical Entity names.
-                // It's safer to just populate entityMap from all entities if JoinResolver traverses arbitrarily.
-            } catch(Exception ignored){}
+        if (spec.getAllRequestedAliases() != null) {
+            for (String entityName : spec.getAllRequestedAliases()) {
+                try { } catch(Exception ignored){}
+            }
         }
         metadataService.getAllEntities().forEach(e -> {
             entityMap.put(e.getEntityMetadata().getLogicalName(), e.getEntityMetadata());
             allRelationships.addAll(e.getRelationships());
         });
 
-        List<JoinNode> joinNodes = joinResolver.resolve(spec.getAllRequestedAliases(), spec.getBaseEntity(), allRelationships, entityMap);
+        List<com.vmetrix.querymanager.domain.engine.join.JoinNode> joinNodes = joinResolver.resolve(spec.getAllRequestedAliases(), spec.getBaseEntity(), allRelationships, entityMap);
         List<String> resolvedJoins = joinNodes.stream()
                 .map(j -> j.getJoinType() + " " + j.getTargetTable() + " " + j.getSqlAlias() + " ON " + j.getOnClause())
                 .collect(Collectors.toList());
@@ -64,6 +56,33 @@ public class QueryAssembler {
         resolvedTables.add(metadataService.findEntityByLogicalName(spec.getBaseEntity()).getPhysicalName());
         joinNodes.forEach(j -> resolvedTables.add(j.getTargetTable())); // This fulfills the spec of "in join-dependency order"
 
+        // Common column resolver matching entity logical/alias name to physical SQL columns
+        BiFunction<String, String, String> columnResolver = (entity, field) -> {
+            // "entity" is the relation alias or logical base entity
+            EntityMetadata em;
+            String alias;
+
+            // Is it the base entity?
+            if (entity.equals(spec.getBaseEntity())) {
+                em = metadataService.findEntityByLogicalName(entity);
+                alias = em.getDefaultAlias();
+            } else {
+                // Must be a JOINed entity. Find it in joinNodes.
+                com.vmetrix.querymanager.domain.engine.join.JoinNode matchedJoin = joinNodes.stream()
+                        .filter(j -> j.getRelationAlias().equals(entity))
+                        .findFirst()
+                        .orElseThrow(() -> new com.vmetrix.querymanager.shared.exception.UnknownEntityException(entity));
+                em = metadataService.findEntityByLogicalName(matchedJoin.getTargetEntity());
+                alias = matchedJoin.getSqlAlias();
+            }
+            
+            FieldMetadata fm = metadataService.findField(em.getLogicalName(), field);
+            return alias + "." + fm.getPhysicalName();
+        };
+
+        // 1. SELECT clause
+        String selectClause = selectBuilder.build(spec.getSelectFields(), columnResolver);
+        int columnCount = spec.getSelectFields() != null ? spec.getSelectFields().size() : 0;
 
         // 4. WHERE clause (Filter Tree)
         String whereClause = "";
@@ -72,34 +91,14 @@ public class QueryAssembler {
         int filterCount = 0;
 
         if (spec.getFilterBaseNode() != null) {
-            BiFunction<String, String, String> columnResolver = (entity, field) -> {
-                EntityMetadata em = metadataService.findEntityByLogicalName(entity);
-                FieldMetadata fm = metadataService.findField(entity, field);
-                
-                // We should use the sql alias. If it's the base entity, use defaultAlias.
-                // If it's joined, we should use the relationAlias. But for fully proper operation,
-                // the logical 'entity' name in a filter is typically the relationAlias. 
-                // For this, we can try to find if there's a join.
-                String alias = em.getDefaultAlias();
-                for (JoinNode join : joinNodes) {
-                    if (join.getRelationAlias().equals(entity)) {
-                        alias = join.getSqlAlias();
-                        break;
-                    }
-                }
-                return alias + "." + fm.getPhysicalName();
-            };
-
-            FilterResult filterResult = filterTreeRenderer.render(spec.getFilterBaseNode(), columnResolver, paramCounter);
+            com.vmetrix.querymanager.domain.engine.filter.FilterResult filterResult = filterTreeRenderer.render(spec.getFilterBaseNode(), columnResolver, paramCounter);
             whereClause = "WHERE " + filterResult.getSqlFragment();
             parameters.putAll(filterResult.getParameters());
-            // Filter count technically should be counted by traversing the tree, but let's approximate based on parameters
-            // since each leaf puts parameter(s). Or we can leave it as param size if they roughly match.
-            filterCount = parameters.size(); // Rough approximation or just count nodes.
+            filterCount = parameters.size();
         }
 
         // 5. ORDER BY clause
-        String orderByClause = orderByBuilder.build(spec.getSortFields());
+        String orderByClause = orderByBuilder.build(spec.getSortFields(), columnResolver);
 
         // Assemble the full SQL
         StringBuilder sql = new StringBuilder();

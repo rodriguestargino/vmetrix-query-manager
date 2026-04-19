@@ -1,36 +1,26 @@
 package com.vmetrix.querymanager.domain.engine.builder;
 
-import com.vmetrix.querymanager.application.service.MetadataService;
-import com.vmetrix.querymanager.domain.model.EntityMetadata;
-import com.vmetrix.querymanager.domain.model.FieldMetadata;
 import com.vmetrix.querymanager.domain.model.SelectField;
-import lombok.RequiredArgsConstructor;
-
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 public class SelectClauseBuilder {
 
-    private final MetadataService metadataService;
-
-    public String build(List<SelectField> fields) {
+    public String build(List<SelectField> fields, BiFunction<String, String, String> columnResolver) {
         if (fields == null || fields.isEmpty()) {
             throw new IllegalArgumentException("SELECT fields cannot be empty");
         }
 
         String columns = fields.stream()
-                .map(this::buildColumn)
+                .map(f -> buildColumn(f, columnResolver))
                 .collect(Collectors.joining(", "));
 
         return "SELECT " + columns;
     }
 
-    private String buildColumn(SelectField field) {
-        EntityMetadata entityMetadata = metadataService.findEntityByLogicalName(field.getEntity());
-        FieldMetadata fieldMetadata = metadataService.findField(field.getEntity(), field.getField());
-
-        String baseColumn = entityMetadata.getDefaultAlias() + "." + fieldMetadata.getPhysicalName();
+    private String buildColumn(SelectField field, BiFunction<String, String, String> columnResolver) {
+        String baseColumn = columnResolver.apply(field.getEntity(), field.getField());
         if (field.getAlias() != null && !field.getAlias().isBlank()) {
             return baseColumn + " AS " + field.getAlias();
         }

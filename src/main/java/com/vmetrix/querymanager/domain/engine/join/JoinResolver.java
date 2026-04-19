@@ -104,6 +104,7 @@ public class JoinResolver {
                 JoinNode joinNode = JoinNode.builder()
                         .sourceTable(sourceEntityMeta.getPhysicalName())
                         .targetTable(targetEntityMeta.getPhysicalName())
+                        .targetEntity(rel.getTargetEntity())
                         .sqlAlias(targetAlias)
                         .onClause(onClause)
                         .joinType(rel.getJoinType())

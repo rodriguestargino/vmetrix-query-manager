@@ -70,9 +70,9 @@ class QueryAssemblerTest {
                 .build();
 
         // Mocks for builders
-        when(selectBuilder.build(spec.getSelectFields())).thenReturn("SELECT t.TXN_DATE");
+        when(selectBuilder.build(eq(spec.getSelectFields()), any())).thenReturn("SELECT t.TXN_DATE");
         when(fromBuilder.build("transaction")).thenReturn("FROM TRANSACTION t");
-        when(orderByBuilder.build(spec.getSortFields())).thenReturn("ORDER BY t.TXN_DATE DESC");
+        when(orderByBuilder.build(eq(spec.getSortFields()), any())).thenReturn("ORDER BY t.TXN_DATE DESC");
 
         when(metadataService.getAllEntities()).thenReturn(List.of());
         when(metadataService.findEntityByLogicalName("transaction"))
@@ -126,9 +126,9 @@ class QueryAssemblerTest {
                 .sortFields(List.of())
                 .build();
 
-        when(selectBuilder.build(spec.getSelectFields())).thenReturn("SELECT t.TXN_DATE");
+        when(selectBuilder.build(eq(spec.getSelectFields()), any())).thenReturn("SELECT t.TXN_DATE");
         when(fromBuilder.build("transaction")).thenReturn("FROM TRANSACTION t");
-        when(orderByBuilder.build(spec.getSortFields())).thenReturn(""); // empty map
+        when(orderByBuilder.build(eq(spec.getSortFields()), any())).thenReturn(""); // empty map
         when(joinResolver.resolve(eq(spec.getAllRequestedAliases()), eq("transaction"), any(), any())).thenReturn(List.of());
         when(metadataService.getAllEntities()).thenReturn(List.of());
         when(metadataService.findEntityByLogicalName("transaction"))

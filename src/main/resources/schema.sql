@@ -6,6 +6,19 @@
 -- BUSINESS TABLES
 -- =============================================================================
 
+DROP TABLE IF EXISTS TRANSACTION;
+DROP TABLE IF EXISTS INSTRUMENT;
+DROP TABLE IF EXISTS PARTY;
+
+-- METADATA TABLES
+-- =============================================================================
+
+DROP TABLE IF EXISTS META_RELATIONSHIP;
+DROP TABLE IF EXISTS META_COLUMN;
+DROP TABLE IF EXISTS META_TABLE;
+
+-- =============================================================================
+
 CREATE TABLE PARTY (
     PARTY_ID       NUMBER(19)    PRIMARY KEY,
     PARTY_NAME     VARCHAR2(200) NOT NULL,

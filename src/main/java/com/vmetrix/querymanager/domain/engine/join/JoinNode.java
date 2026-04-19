@@ -1,3 +1,4 @@
+
 package com.vmetrix.querymanager.domain.engine.join;
 
 import lombok.Builder;
@@ -17,7 +18,13 @@ public class JoinNode {
     /** Physical table name of the target entity (e.g. "INSTRUMENT") */
     String targetTable;
 
-    /** SQL alias used in the query, derived from RELATION_ALIAS (e.g. "counterparty") */
+    /** Logical entity name of the target (e.g. "instrument", "party") */
+    String targetEntity;
+
+    /**
+     * SQL alias used in the query, derived from RELATION_ALIAS (e.g.
+     * "counterparty")
+     */
     String sqlAlias;
 
     /** Full ON clause string (e.g. "t.INSTRUMENT_ID = i.INSTRUMENT_ID") */
@@ -26,6 +33,9 @@ public class JoinNode {
     /** JOIN type from metadata (e.g. "LEFT JOIN") */
     String joinType;
 
-    /** Logical relation alias from metadata (e.g. "instrument", "counterparty", "issuer") */
+    /**
+     * Logical relation alias from metadata (e.g. "instrument", "counterparty",
+     * "issuer")
+     */
     String relationAlias;
 }
