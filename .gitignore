@@ -49,3 +49,7 @@ package-lock.json
 
 # === Backup files ===
 *.bak
+
+# === AI / MCP ===
+.ai/mcp.json
+.env.mcp

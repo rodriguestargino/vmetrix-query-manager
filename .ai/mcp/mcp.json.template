@@ -1,0 +1,52 @@
+{
+  "mcpServers": {
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres"
+      ],
+      "env": {
+        "DATABASE_URL": "postgresql://[USER]:[PASSWORD]@[HOST]:[PORT]/[DB]"
+      }
+    },
+    "git": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-git",
+        "--repository",
+        "[ABSOLUTE_PATH_TO_REPO]"
+      ],
+      "description": "Git history and staged changes"
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": [
+        "mcp-server-fetch"
+      ],
+      "description": "HTTP fetch — call local API endpoints"
+    },
+    "jira": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "jira-mcp"
+      ],
+      "env": {
+        "JIRA_API_KEY": "[YOUR_JIRA_API_KEY]",
+        "JIRA_USER_EMAIL": "[YOUR_EMAIL]",
+        "JIRA_INSTANCE_URL": "[YOUR_INSTANCE].atlassian.net"
+      },
+      "description": "Atlassian MCP — Create and modify Jira issues"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "[ABSOLUTE_PATH_TO_REPO]"
+      ],
+      "description": "Read/write access to project files"
+    }
+  }
+}
