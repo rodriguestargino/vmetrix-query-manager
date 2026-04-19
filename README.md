@@ -48,7 +48,7 @@ The engine receives a high-level query specification (columns + filters) via RES
 ## Prerequisites
 
 - **Java 17+** (tested with Oracle JDK 17 and 21; source/target compile level is 17)
-- **Maven 3.8+** (a bundled wrapper `./mvnw` is also available)
+- **Maven 3.8+**
 - No other runtime dependencies — the database is embedded **H2 in Oracle compatibility mode**.
 
 ---
@@ -58,7 +58,7 @@ The engine receives a high-level query specification (columns + filters) via RES
 Single command (from the project root):
 
 ```bash
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 The service listens on **port 8080** (configurable via `server.port` in `application.yml`).
@@ -81,7 +81,7 @@ See [H2 Console](#h2-console) for database credentials and example queries.
 Single command:
 
 ```bash
-./mvnw test
+mvn test
 ```
 
 **Coverage:**
@@ -105,7 +105,7 @@ Single command:
 Run a single class:
 
 ```bash
-./mvnw test -Dtest=FilterTreeRendererTest
+mvn test -Dtest=FilterTreeRendererTest
 ```
 
 ---

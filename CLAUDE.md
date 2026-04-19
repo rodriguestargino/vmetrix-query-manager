@@ -25,6 +25,13 @@ changes. Everything comes from metadata configuration.
 
 ---
 
+## Build & Run
+- Run service: `mvn spring-boot:run`
+- Run tests: `mvn test`
+- Build package: `mvn clean package`
+
+---
+
 ## Architecture — Hexagonal (Ports & Adapters)
 
 ### Package Structure
