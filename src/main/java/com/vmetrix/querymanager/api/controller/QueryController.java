@@ -14,6 +14,7 @@ import com.vmetrix.querymanager.domain.engine.builder.QuerySpecification;
 import com.vmetrix.querymanager.domain.model.QueryResult;
 import com.vmetrix.querymanager.domain.model.ValidationError;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/query")
@@ -87,6 +89,21 @@ public class QueryController {
                 }
               ]
             }
+            """;
+
+    private static final String EXECUTE_RESPONSE_EXAMPLE = """
+            [
+              {
+                "txnId": 1001,
+                "txnDate": "2026-04-18",
+                "counterpartyName": "Global Bank corp"
+              },
+              {
+                "txnId": 1002,
+                "txnDate": "2026-04-19",
+                "counterpartyName": "Alpha Investments"
+              }
+            ]
             """;
 
     private static final String ERROR_RESPONSE_EXAMPLE = """
@@ -147,6 +164,36 @@ public class QueryController {
         QuerySpecification spec = queryRequestMapper.toDomain(request);
         QueryResult result = queryService.buildQuery(spec);
         return ResponseEntity.ok(queryBuildResponseMapper.toDto(result));
+    }
+
+    @PostMapping("/execute")
+    @Operation(
+            summary = "Execute a query and return actual data",
+            description = "Builds the parameterized SQL from the specification and executes it "
+                    + "against the H2 database. Returns a list of maps representing the result set columns."
+    )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            required = true,
+            description = "Query specification (same shape as /build)",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = QueryRequestDto.class),
+                    examples = @ExampleObject(
+                            name = "executeSample",
+                            value = BUILD_REQUEST_EXAMPLE)))
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Query executed successfully",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = Map.class)),
+                            examples = @ExampleObject(value = EXECUTE_RESPONSE_EXAMPLE))),
+            @ApiResponse(responseCode = "400", description = "Invalid query specification"),
+            @ApiResponse(responseCode = "500", description = "Database execution error")
+    })
+    public ResponseEntity<List<Map<String, Object>>> executeQuery(@Valid @RequestBody QueryRequestDto request) {
+        QuerySpecification spec = queryRequestMapper.toDomain(request);
+        List<Map<String, Object>> result = queryService.executeQuery(spec);
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/validate")

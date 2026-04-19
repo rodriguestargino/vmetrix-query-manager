@@ -1,8 +1,13 @@
 package com.vmetrix.querymanager.shared.exception;
 
-public class InvalidComparatorException extends RuntimeException {
+import lombok.Getter;
 
-    public InvalidComparatorException(String comparatorName) {
-        super(String.format("Unknown comparator: '%s' is not a valid comparator", comparatorName));
+@Getter
+public class InvalidComparatorException extends RuntimeException {
+    private final String comparator;
+
+    public InvalidComparatorException(String comparator) {
+        super(String.format("Unknown comparator: '%s' is not a valid comparator", comparator));
+        this.comparator = comparator;
     }
 }
