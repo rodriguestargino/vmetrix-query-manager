@@ -108,6 +108,13 @@ Run a single class:
 mvn test -Dtest=FilterTreeRendererTest
 ```
 
+### Functional Verification
+
+For manual testing of the API endpoints (including multi-hop joins and complex nested filters), refer to the detailed documentation:
+
+- [**Verification Plan**](./docs/testing/VERIFICATION_PLAN.md) — Acceptance criteria and requirement checklist.
+- [**API Test Suite**](./docs/testing/TEST_SUITE.md) — Ready-to-use JSON payloads for `curl` or Postman.
+
 ---
 
 ## Architecture
