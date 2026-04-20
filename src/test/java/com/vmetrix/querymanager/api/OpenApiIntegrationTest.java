@@ -23,11 +23,12 @@ class OpenApiIntegrationTest {
     private MockMvc mockMvc;
 
     @Test
-    void should_expose_openapi_spec_with_all_four_endpoints() throws Exception {
+    void should_expose_openapi_spec_with_all_five_endpoints() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("application/json"))
                 .andExpect(jsonPath("$.paths['/api/query/build']").exists())
+                .andExpect(jsonPath("$.paths['/api/query/execute']").exists())
                 .andExpect(jsonPath("$.paths['/api/query/validate']").exists())
                 .andExpect(jsonPath("$.paths['/api/metadata/entities']").exists())
                 .andExpect(jsonPath("$.paths['/api/metadata/comparators']").exists());
@@ -54,7 +55,7 @@ class OpenApiIntegrationTest {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(
-                        "$.paths['/api/query/build'].post.requestBody.content['application/json'].examples")
+                        "$.paths['/api/query/build'].post.requestBody.content['application/json'].examples.specSection5-1")
                         .exists());
     }
 
@@ -63,7 +64,25 @@ class OpenApiIntegrationTest {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(
-                        "$.paths['/api/query/build'].post.responses.200.content['application/json'].examples")
+                        "$.paths['/api/query/build'].post.responses.200.content['application/json'].examples.specSection5-1Response")
+                        .exists());
+    }
+
+    @Test
+    void should_include_request_example_for_execute_endpoint() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(
+                        "$.paths['/api/query/execute'].post.requestBody.content['application/json'].examples.executeSample")
+                        .exists());
+    }
+
+    @Test
+    void should_include_response_example_for_execute_endpoint() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(
+                        "$.paths['/api/query/execute'].post.responses.200.content['application/json'].examples.default")
                         .exists());
     }
 
@@ -72,7 +91,16 @@ class OpenApiIntegrationTest {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.paths['/api/query/build'].post.tags[0]").value("Query API"))
+                .andExpect(jsonPath("$.paths['/api/query/execute'].post.tags[0]").value("Query API"))
                 .andExpect(jsonPath("$.paths['/api/query/validate'].post.tags[0]").value("Query API"));
+    }
+
+    @Test
+    void should_tag_metadata_endpoints_with_metadata_api_tag() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.paths['/api/metadata/entities'].get.tags[0]").value("Metadata API"))
+                .andExpect(jsonPath("$.paths['/api/metadata/comparators'].get.tags[0]").value("Metadata API"));
     }
 
     @Test
