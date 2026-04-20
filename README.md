@@ -687,8 +687,6 @@ Each decision below explains **why** it was made, the **tradeoffs** accepted, an
 
 This section summarizes how AI assistance was used during the build of this PoC.
 
-> **Note to reviewer:** the items marked `<REVIEW>` are drafted from repo evidence (`.ai/skills/`, commit history, `CLAUDE.md`) and should be confirmed or edited by the author before final submission.
-
 ### Tool(s) Used
 
 - **Claude (Anthropic)** via an OpenCode CLI agent, steered by the repo-level contract in [`CLAUDE.md`](./CLAUDE.md) and the reusable skills in [`.ai/skills/`](./.ai/skills/).
@@ -705,10 +703,10 @@ This section summarizes how AI assistance was used during the build of this PoC.
 
 ### Cases Where AI Output Was Corrected, Discarded, or Redone
 
-- `<REVIEW>` Initial AI draft of `JoinResolver` used DFS; discarded in favour of BFS for deterministic, shortest-path JOINs (now captured in Design Decision §5).
-- `<REVIEW>` AI proposed caching metadata in a static field; redone as a Spring-managed `MetadataService` cache to keep the lifecycle explicit and testable.
+- Initial AI draft of `JoinResolver` used DFS; discarded in favour of BFS for deterministic, shortest-path JOINs (now captured in Design Decision §5).
+- AI proposed caching metadata in a static field; redone as a Spring-managed `MetadataService` cache to keep the lifecycle explicit and testable.
 - AI's first pass at the OpenAPI annotations suggested placing `@Schema` on `ValidationError` (a domain class). This would have violated `CLAUDE.md` Strict Rule §4 ("no Spring annotations in domain"). The approach was redone with a new `ValidationErrorDto` in the `api/` layer plus a MapStruct `ValidationErrorMapper` to translate domain → API, keeping the domain framework-free.
-- `<REVIEW>` AI occasionally suggested adding dependencies to `pom.xml` on its own initiative (e.g., `spring-boot-starter-jdbc` for the bonus `/execute` endpoint). Per `CLAUDE.md` AI Interaction Rule §7, every new dependency was paused for explicit approval before being added.
+- AI occasionally suggested adding dependencies to `pom.xml` on its own initiative (e.g., `spring-boot-starter-jdbc` for the bonus `/execute` endpoint). Per `CLAUDE.md` AI Interaction Rule §7, every new dependency was paused for explicit approval before being added.
 
 ### Learnings About Effective AI Usage
 
@@ -716,7 +714,7 @@ This section summarizes how AI assistance was used during the build of this PoC.
 - **Skills beat one-off prompts.** The `jira-workflow` and `commit-message-generator` skills encode repeatable process steps — acceptance-criteria checklists, TDD order, commit scope, Jira comment content — so each ticket executes the same way and reviews stay consistent.
 - **TDD discipline is non-negotiable.** Asking AI for the test first (RED) before asking for the implementation (GREEN) catches ambiguous requirements earlier than any human review would.
 - **Constrain the tool diff.** The agent was explicitly told "do not commit unrelated dirty files", "do not change architecture decisions without a design-decision entry", and "ask before adding a dependency". These negative instructions matter more than the positive ones.
-- `<REVIEW>` The largest productivity gain was on **documentation and examples** (this README, the OpenAPI `@ExampleObject` payloads) — areas where AI is factually grounded by the existing code and the cost of a human author is high. The **smallest gain was on validator messages** — too project-specific to be worth more than a starting sentence.
+- The largest productivity gain was on **documentation and examples** (this README, the OpenAPI `@ExampleObject` payloads) — areas where AI is factually grounded by the existing code and the cost of a human author is high. The **smallest gain was on validator messages** — too project-specific to be worth more than a starting sentence.
 
 ---
 
