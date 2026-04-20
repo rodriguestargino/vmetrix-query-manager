@@ -21,7 +21,7 @@ public class SelectClauseBuilder {
 
     private String buildColumn(SelectField field, BiFunction<String, String, String> columnResolver) {
         String baseColumn = columnResolver.apply(field.getEntity(), field.getField());
-        if (field.getAlias() != null && !field.getAlias().isBlank()) {
+        if (field.getAlias() != null && !field.getAlias().trim().isEmpty()) {
             return baseColumn + " AS " + field.getAlias();
         }
         return baseColumn;

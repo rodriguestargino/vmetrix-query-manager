@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,9 +55,9 @@ class MetadataServiceTest {
                 .joinType("LEFT JOIN")
                 .build();
 
-        when(metadataRepository.findAllEntities()).thenReturn(List.of(txEntity));
-        when(metadataRepository.findAllFields()).thenReturn(List.of(txnDate));
-        when(metadataRepository.findAllRelationships()).thenReturn(List.of(txToParty));
+        when(metadataRepository.findAllEntities()).thenReturn(Collections.singletonList(txEntity));
+        when(metadataRepository.findAllFields()).thenReturn(Collections.singletonList(txnDate));
+        when(metadataRepository.findAllRelationships()).thenReturn(Collections.singletonList(txToParty));
 
         metadataService.initCache();
     }

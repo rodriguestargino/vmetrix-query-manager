@@ -4,6 +4,7 @@ import com.vmetrix.querymanager.domain.model.SortField;
 import com.vmetrix.querymanager.domain.model.SortDirection;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -20,7 +21,7 @@ class OrderByClauseBuilderTest {
 
     @Test
     void should_build_order_by_clause() {
-        List<SortField> fields = List.of(
+        List<SortField> fields = Arrays.asList(
                 new SortField("transaction", "txnDate", SortDirection.DESC),
                 new SortField("transaction", "txnId", SortDirection.ASC)
         );

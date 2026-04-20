@@ -17,6 +17,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,10 +65,10 @@ class QueryAssemblerTest {
         // Arrange
         QuerySpecification spec = QuerySpecification.builder()
                 .baseEntity("transaction")
-                .selectFields(List.of(SelectField.builder().entity("transaction").field("txnDate").build()))
-                .allRequestedAliases(Set.of("transaction", "instrument"))
+                .selectFields(Arrays.asList(SelectField.builder().entity("transaction").field("txnDate").build()))
+                .allRequestedAliases(new HashSet<>(Arrays.asList("transaction", "instrument")))
                 .filterBaseNode(FilterCondition.builder().entity("transaction").field("status").comparator("equals").value("SETTLED").build())
-                .sortFields(List.of(SortField.builder().entity("transaction").field("txnDate").direction(SortDirection.DESC).build()))
+                .sortFields(Arrays.asList(SortField.builder().entity("transaction").field("txnDate").direction(SortDirection.DESC).build()))
                 .maxResults(10)
                 .build();
 
@@ -74,12 +77,12 @@ class QueryAssemblerTest {
         when(fromBuilder.build("transaction")).thenReturn("FROM TRANSACTION t");
         when(orderByBuilder.build(eq(spec.getSortFields()), any())).thenReturn("ORDER BY t.TXN_DATE DESC");
 
-        when(metadataService.getAllEntities()).thenReturn(List.of());
+        when(metadataService.getAllEntities()).thenReturn(Collections.emptyList());
         when(metadataService.findEntityByLogicalName("transaction"))
                 .thenReturn(EntityMetadata.builder().physicalName("TRANSACTION").defaultAlias("t").build());
 
         // Mocks for Join
-        List<JoinNode> joins = List.of(
+        List<JoinNode> joins = Arrays.asList(
                 JoinNode.builder()
                         .joinType("LEFT JOIN")
                         .targetTable("INSTRUMENT")
@@ -94,7 +97,7 @@ class QueryAssemblerTest {
         // Mocks for Filter
         FilterResult filterResult = FilterResult.builder()
                 .sqlFragment("(t.STATUS = :p1)")
-                .parameters(Map.of("p1", "SETTLED"))
+                .parameters(Collections.singletonMap("p1", "SETTLED"))
                 .build();
         when(filterTreeRenderer.render(eq(spec.getFilterBaseNode()), any(), any(AtomicInteger.class)))
                 .thenReturn(filterResult);
@@ -121,16 +124,16 @@ class QueryAssemblerTest {
         // Arrange
         QuerySpecification spec = QuerySpecification.builder()
                 .baseEntity("transaction")
-                .selectFields(List.of(SelectField.builder().entity("transaction").field("txnDate").build()))
-                .allRequestedAliases(Set.of("transaction"))
-                .sortFields(List.of())
+                .selectFields(Arrays.asList(SelectField.builder().entity("transaction").field("txnDate").build()))
+                .allRequestedAliases(Collections.singleton("transaction"))
+                .sortFields(Collections.emptyList())
                 .build();
 
         when(selectBuilder.build(eq(spec.getSelectFields()), any())).thenReturn("SELECT t.TXN_DATE");
         when(fromBuilder.build("transaction")).thenReturn("FROM TRANSACTION t");
         when(orderByBuilder.build(eq(spec.getSortFields()), any())).thenReturn(""); // empty map
-        when(joinResolver.resolve(eq(spec.getAllRequestedAliases()), eq("transaction"), any(), any())).thenReturn(List.of());
-        when(metadataService.getAllEntities()).thenReturn(List.of());
+        when(joinResolver.resolve(eq(spec.getAllRequestedAliases()), eq("transaction"), any(), any())).thenReturn(Collections.emptyList());
+        when(metadataService.getAllEntities()).thenReturn(Collections.emptyList());
         when(metadataService.findEntityByLogicalName("transaction"))
                 .thenReturn(EntityMetadata.builder().physicalName("TRANSACTION").defaultAlias("t").build());
 

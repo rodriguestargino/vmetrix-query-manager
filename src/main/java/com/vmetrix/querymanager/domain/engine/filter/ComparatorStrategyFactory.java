@@ -2,6 +2,8 @@ package com.vmetrix.querymanager.domain.engine.filter;
 
 import com.vmetrix.querymanager.shared.exception.InvalidComparatorException;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -15,20 +17,20 @@ public class ComparatorStrategyFactory {
     private final Map<String, ComparatorStrategy> strategies;
 
     public ComparatorStrategyFactory() {
-        this.strategies = Map.ofEntries(
-                Map.entry("equals", new EqualStrategy()),
-                Map.entry("notEquals", new NotEqualStrategy()),
-                Map.entry("greaterThan", new GreaterThanStrategy()),
-                Map.entry("lessThan", new LessThanStrategy()),
-                Map.entry("greaterOrEqual", new GreaterOrEqualStrategy()),
-                Map.entry("lessOrEqual", new LessOrEqualStrategy()),
-                Map.entry("in", new InStrategy()),
-                Map.entry("notIn", new NotInStrategy()),
-                Map.entry("between", new BetweenStrategy()),
-                Map.entry("like", new LikeStrategy()),
-                Map.entry("isNull", new IsNullStrategy()),
-                Map.entry("isNotNull", new IsNotNullStrategy())
-        );
+        Map<String, ComparatorStrategy> map = new HashMap<>();
+        map.put("equals", new EqualStrategy());
+        map.put("notEquals", new NotEqualStrategy());
+        map.put("greaterThan", new GreaterThanStrategy());
+        map.put("lessThan", new LessThanStrategy());
+        map.put("greaterOrEqual", new GreaterOrEqualStrategy());
+        map.put("lessOrEqual", new LessOrEqualStrategy());
+        map.put("in", new InStrategy());
+        map.put("notIn", new NotInStrategy());
+        map.put("between", new BetweenStrategy());
+        map.put("like", new LikeStrategy());
+        map.put("isNull", new IsNullStrategy());
+        map.put("isNotNull", new IsNotNullStrategy());
+        this.strategies = Collections.unmodifiableMap(map);
     }
 
     /**

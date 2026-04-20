@@ -1,6 +1,6 @@
 package com.vmetrix.querymanager.domain.engine.filter;
 
-import java.util.Map;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /** Strategy: {@code col = :pN} — 1 bind parameter */
@@ -11,7 +11,7 @@ public class EqualStrategy implements ComparatorStrategy {
         String paramName = "p" + paramCounter.getAndIncrement();
         return FilterResult.builder()
                 .sqlFragment(qualifiedColumn + " = :" + paramName)
-                .parameters(Map.of(paramName, value))
+                .parameters(Collections.singletonMap(paramName, value))
                 .build();
     }
 }

@@ -3,6 +3,8 @@ package com.vmetrix.querymanager.domain.engine.builder;
 import com.vmetrix.querymanager.domain.model.SelectField;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -21,7 +23,7 @@ class SelectClauseBuilderTest {
 
     @Test
     void should_build_select_clause() {
-        List<SelectField> fields = List.of(
+        List<SelectField> fields = Arrays.asList(
                 new SelectField("transaction", "txnId", null),
                 new SelectField("counterparty", "partyName", "counterpartyName")
         );
@@ -32,7 +34,7 @@ class SelectClauseBuilderTest {
 
     @Test
     void should_throw_when_empty() {
-        assertThatThrownBy(() -> builder.build(List.of(), mockResolver))
+        assertThatThrownBy(() -> builder.build(Collections.emptyList(), mockResolver))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

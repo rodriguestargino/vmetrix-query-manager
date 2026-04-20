@@ -15,6 +15,7 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -130,11 +131,11 @@ public class MetadataService implements com.vmetrix.querymanager.domain.port.Met
 
     @Override
     public Map<String, List<String>> getComparators() {
-        return Map.of(
-            "string", Arrays.asList("equals", "notEquals", "like", "in", "notIn", "isNull", "isNotNull"),
-            "number", Arrays.asList("equals", "notEquals", "greaterThan", "lessThan", "greaterOrEqual", "lessOrEqual", "between", "in", "isNull", "isNotNull"),
-            "date", Arrays.asList("equals", "notEquals", "greaterThan", "lessThan", "greaterOrEqual", "lessOrEqual", "between", "isNull", "isNotNull"),
-            "timestamp", Arrays.asList("equals", "notEquals", "greaterThan", "lessThan", "greaterOrEqual", "lessOrEqual", "isNull", "isNotNull")
-        );
+        Map<String, List<String>> comparators = new HashMap<>();
+        comparators.put("string", Arrays.asList("equals", "notEquals", "like", "in", "notIn", "isNull", "isNotNull"));
+        comparators.put("number", Arrays.asList("equals", "notEquals", "greaterThan", "lessThan", "greaterOrEqual", "lessOrEqual", "between", "in", "isNull", "isNotNull"));
+        comparators.put("date", Arrays.asList("equals", "notEquals", "greaterThan", "lessThan", "greaterOrEqual", "lessOrEqual", "between", "isNull", "isNotNull"));
+        comparators.put("timestamp", Arrays.asList("equals", "notEquals", "greaterThan", "lessThan", "greaterOrEqual", "lessOrEqual", "isNull", "isNotNull"));
+        return Collections.unmodifiableMap(comparators);
     }
 }

@@ -3,8 +3,8 @@ package com.vmetrix.querymanager.domain.engine.filter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,7 +26,7 @@ class ComparatorStrategyTest {
         FilterResult result = strategy.apply("t.STATUS", counter, "SETTLED");
 
         assertEquals("t.STATUS = :p1", result.getSqlFragment());
-        assertEquals(Map.of("p1", "SETTLED"), result.getParameters());
+        assertEquals(Collections.singletonMap("p1", "SETTLED"), result.getParameters());
         assertEquals(2, counter.get(), "Counter should be incremented to 2");
     }
 
@@ -41,7 +41,7 @@ class ComparatorStrategyTest {
         FilterResult result = strategy.apply("t.AMOUNT", counter, 1000000);
 
         assertEquals("t.AMOUNT > :p1", result.getSqlFragment());
-        assertEquals(Map.of("p1", 1000000), result.getParameters());
+        assertEquals(Collections.singletonMap("p1", 1000000), result.getParameters());
     }
 
     // ── Test 3: in on string field with list ──
@@ -52,7 +52,7 @@ class ComparatorStrategyTest {
         ComparatorStrategy strategy = new InStrategy();
         AtomicInteger counter = new AtomicInteger(1);
 
-        FilterResult result = strategy.apply("i.ASSET_CLASS", counter, List.of("EQUITY", "FIXED_INCOME", "ALTERNATIVES"));
+        FilterResult result = strategy.apply("i.ASSET_CLASS", counter, Arrays.asList("EQUITY", "FIXED_INCOME", "ALTERNATIVES"));
 
         assertEquals("i.ASSET_CLASS IN (:p1, :p2, :p3)", result.getSqlFragment());
         assertEquals(3, result.getParameters().size());
@@ -70,7 +70,7 @@ class ComparatorStrategyTest {
         ComparatorStrategy strategy = new BetweenStrategy();
         AtomicInteger counter = new AtomicInteger(1);
 
-        FilterResult result = strategy.apply("t.TXN_DATE", counter, List.of("2026-01-01", "2026-12-31"));
+        FilterResult result = strategy.apply("t.TXN_DATE", counter, Arrays.asList("2026-01-01", "2026-12-31"));
 
         assertEquals("t.TXN_DATE BETWEEN :p1 AND :p2", result.getSqlFragment());
         assertEquals(2, result.getParameters().size());
@@ -120,6 +120,6 @@ class ComparatorStrategyTest {
         FilterResult result = strategy.apply("p.PARTY_NAME", counter, "%Bank%");
 
         assertEquals("p.PARTY_NAME LIKE :p1", result.getSqlFragment());
-        assertEquals(Map.of("p1", "%Bank%"), result.getParameters());
+        assertEquals(Collections.singletonMap("p1", "%Bank%"), result.getParameters());
     }
 }

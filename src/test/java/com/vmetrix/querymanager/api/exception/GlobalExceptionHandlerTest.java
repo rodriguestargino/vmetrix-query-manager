@@ -13,7 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.util.List;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -81,10 +81,10 @@ class GlobalExceptionHandlerTest {
     void should_handle_method_argument_not_valid_exception() {
         MethodParameter parameter = mock(MethodParameter.class);
         BindingResult bindingResult = mock(BindingResult.class);
-        when(bindingResult.getFieldErrors()).thenReturn(List.of(
+        when(bindingResult.getFieldErrors()).thenReturn(Collections.singletonList(
                 new FieldError("queryRequest", "select", "must not be empty")
         ));
-        
+
         MethodArgumentNotValidException ex = new MethodArgumentNotValidException(parameter, bindingResult);
         ResponseEntity<ErrorResponse> response = handler.handleMethodArgumentNotValidException(ex);
 

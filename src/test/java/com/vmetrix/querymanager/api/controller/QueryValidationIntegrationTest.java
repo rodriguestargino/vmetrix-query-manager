@@ -22,20 +22,18 @@ class QueryValidationIntegrationTest {
 
     @Test
     void should_return_200_for_valid_request() throws Exception {
-        String jsonPayload = """
-                {
-                  "select": [
-                    {"entity": "transaction", "field": "txnDate"},
-                    {"entity": "counterparty", "field": "partyName"}
-                  ],
-                  "filters": {
-                    "operator": "AND",
-                    "conditions": [
-                      {"entity": "transaction", "field": "status", "comparator": "equals", "value": "SETTLED"}
-                    ]
-                  }
-                }
-                """;
+        String jsonPayload = "{\n" +
+                "  \"select\": [\n" +
+                "    {\"entity\": \"transaction\", \"field\": \"txnDate\"},\n" +
+                "    {\"entity\": \"counterparty\", \"field\": \"partyName\"}\n" +
+                "  ],\n" +
+                "  \"filters\": {\n" +
+                "    \"operator\": \"AND\",\n" +
+                "    \"conditions\": [\n" +
+                "      {\"entity\": \"transaction\", \"field\": \"status\", \"comparator\": \"equals\", \"value\": \"SETTLED\"}\n" +
+                "    ]\n" +
+                "  }\n" +
+                "}";
 
         mockMvc.perform(post("/api/query/validate")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -48,13 +46,11 @@ class QueryValidationIntegrationTest {
 
     @Test
     void should_return_400_for_unknown_entity() throws Exception {
-        String jsonPayload = """
-                {
-                  "select": [
-                    {"entity": "unknown_entity", "field": "txnDate"}
-                  ]
-                }
-                """;
+        String jsonPayload = "{\n" +
+                "  \"select\": [\n" +
+                "    {\"entity\": \"unknown_entity\", \"field\": \"txnDate\"}\n" +
+                "  ]\n" +
+                "}";
 
         mockMvc.perform(post("/api/query/validate")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -68,19 +64,17 @@ class QueryValidationIntegrationTest {
 
     @Test
     void should_return_400_for_invalid_comparator() throws Exception {
-        String jsonPayload = """
-                {
-                  "select": [
-                    {"entity": "transaction", "field": "txnDate"}
-                  ],
-                  "filters": {
-                    "operator": "AND",
-                    "conditions": [
-                      {"entity": "transaction", "field": "status", "comparator": "greaterThan", "value": "SETTLED"}
-                    ]
-                  }
-                }
-                """;
+        String jsonPayload = "{\n" +
+                "  \"select\": [\n" +
+                "    {\"entity\": \"transaction\", \"field\": \"txnDate\"}\n" +
+                "  ],\n" +
+                "  \"filters\": {\n" +
+                "    \"operator\": \"AND\",\n" +
+                "    \"conditions\": [\n" +
+                "      {\"entity\": \"transaction\", \"field\": \"status\", \"comparator\": \"greaterThan\", \"value\": \"SETTLED\"}\n" +
+                "    ]\n" +
+                "  }\n" +
+                "}";
 
         mockMvc.perform(post("/api/query/validate")
                         .contentType(MediaType.APPLICATION_JSON)

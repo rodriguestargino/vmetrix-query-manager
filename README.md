@@ -47,7 +47,7 @@ The engine receives a high-level query specification (columns + filters) via RES
 
 ## Prerequisites
 
-- **Java 17+** (tested with Oracle JDK 17 and 21; source/target compile level is 17)
+- **Java 8+** (tested with Oracle JDK 17 and 21)
 - **Maven 3.8+**
 - No other runtime dependencies — the database is embedded **H2 in Oracle compatibility mode**.
 

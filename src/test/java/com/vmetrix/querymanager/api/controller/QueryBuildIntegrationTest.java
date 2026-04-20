@@ -26,24 +26,22 @@ class QueryBuildIntegrationTest {
 
     @Test
     void should_build_query_golden_path() throws Exception {
-        String jsonPayload = """
-                {
-                  "select": [
-                    {"entity": "transaction", "field": "txnDate"},
-                    {"entity": "counterparty", "field": "partyName", "alias": "counterpartyName"}
-                  ],
-                  "filters": {
-                    "operator": "AND",
-                    "conditions": [
-                      {"entity": "transaction", "field": "status", "comparator": "equals", "value": "SETTLED"}
-                    ]
-                  },
-                  "sorting": [
-                    {"entity": "transaction", "field": "txnDate", "direction": "desc"}
-                  ],
-                  "maxResults": 500
-                }
-                """;
+        String jsonPayload = "{\n" +
+                "  \"select\": [\n" +
+                "    {\"entity\": \"transaction\", \"field\": \"txnDate\"},\n" +
+                "    {\"entity\": \"counterparty\", \"field\": \"partyName\", \"alias\": \"counterpartyName\"}\n" +
+                "  ],\n" +
+                "  \"filters\": {\n" +
+                "    \"operator\": \"AND\",\n" +
+                "    \"conditions\": [\n" +
+                "      {\"entity\": \"transaction\", \"field\": \"status\", \"comparator\": \"equals\", \"value\": \"SETTLED\"}\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  \"sorting\": [\n" +
+                "    {\"entity\": \"transaction\", \"field\": \"txnDate\", \"direction\": \"desc\"}\n" +
+                "  ],\n" +
+                "  \"maxResults\": 500\n" +
+                "}";
 
         mockMvc.perform(post("/api/query/build")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -54,13 +52,11 @@ class QueryBuildIntegrationTest {
 
     @Test
     void should_build_query_with_only_select() throws Exception {
-        String jsonPayload = """
-                {
-                  "select": [
-                    {"entity": "transaction", "field": "txnDate"}
-                  ]
-                }
-                """;
+        String jsonPayload = "{\n" +
+                "  \"select\": [\n" +
+                "    {\"entity\": \"transaction\", \"field\": \"txnDate\"}\n" +
+                "  ]\n" +
+                "}";
 
         mockMvc.perform(post("/api/query/build")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -74,13 +70,11 @@ class QueryBuildIntegrationTest {
 
     @Test
     void should_return_400_for_unknown_entity_in_select() throws Exception {
-        String jsonPayload = """
-                {
-                  "select": [
-                    {"entity": "unknown_entity", "field": "txnDate"}
-                  ]
-                }
-                """;
+        String jsonPayload = "{\n" +
+                "  \"select\": [\n" +
+                "    {\"entity\": \"unknown_entity\", \"field\": \"txnDate\"}\n" +
+                "  ]\n" +
+                "}";
 
         mockMvc.perform(post("/api/query/build")
                         .contentType(MediaType.APPLICATION_JSON)

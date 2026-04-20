@@ -81,13 +81,15 @@ public class QueryValidatorImpl implements QueryValidator {
     }
 
     private void validateFilterNode(FilterNode node, List<ValidationError> errors, Map<String, List<String>> comparators) {
-        if (node instanceof FilterGroup group) {
+        if (node instanceof FilterGroup) {
+            FilterGroup group = (FilterGroup) node;
             if (group.getConditions() != null) {
                 for (FilterNode child : group.getConditions()) {
                     validateFilterNode(child, errors, comparators);
                 }
             }
-        } else if (node instanceof FilterCondition condition) {
+        } else if (node instanceof FilterCondition) {
+            FilterCondition condition = (FilterCondition) node;
             try {
                 EntityMetadata em = metadataService.findEntityByAlias(condition.getEntity());
                 FieldMetadata fieldMeta = metadataService.findField(em.getLogicalName(), condition.getField());

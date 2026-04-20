@@ -31,7 +31,7 @@ class JoinResolverTest {
         entityMap.put("party", EntityMetadata.builder()
                 .logicalName("party").physicalName("PARTY").defaultAlias("p").build());
 
-        allRelationships = List.of(
+        allRelationships = Arrays.asList(
                 RelationshipMetadata.builder()
                         .sourceEntity("transaction").sourceColumn("INSTRUMENT_ID")
                         .targetEntity("instrument").targetColumn("INSTRUMENT_ID")
@@ -50,7 +50,7 @@ class JoinResolverTest {
     @Test
     @DisplayName("should return empty joins when single entity requested")
     void should_return_empty_joins_when_single_entity_requested() {
-        Set<String> requested = Set.of("transaction");
+        Set<String> requested = Collections.singleton("transaction");
         List<JoinNode> result = joinResolver.resolve(requested, "transaction", allRelationships, entityMap);
         assertTrue(result.isEmpty());
     }
@@ -58,7 +58,7 @@ class JoinResolverTest {
     @Test
     @DisplayName("should return one join when direct relationship exists")
     void should_return_one_join_when_direct_relationship_exists() {
-        Set<String> requested = new LinkedHashSet<>(List.of("transaction", "instrument"));
+        Set<String> requested = new LinkedHashSet<>(Arrays.asList("transaction", "instrument"));
         List<JoinNode> result = joinResolver.resolve(requested, "transaction", allRelationships, entityMap);
         assertEquals(1, result.size());
         assertEquals("instrument", result.get(0).getRelationAlias());
@@ -68,7 +68,7 @@ class JoinResolverTest {
     @Test
     @DisplayName("should return aliased join when counterparty requested")
     void should_return_aliased_join_when_counterparty_requested() {
-        Set<String> requested = new LinkedHashSet<>(List.of("transaction", "counterparty"));
+        Set<String> requested = new LinkedHashSet<>(Arrays.asList("transaction", "counterparty"));
         List<JoinNode> result = joinResolver.resolve(requested, "transaction", allRelationships, entityMap);
         assertEquals(1, result.size());
         assertEquals("counterparty", result.get(0).getSqlAlias());
@@ -77,7 +77,7 @@ class JoinResolverTest {
     @Test
     @DisplayName("should return chained joins when issuer requested")
     void should_return_chained_joins_when_issuer_requested() {
-        Set<String> requested = new LinkedHashSet<>(List.of("transaction", "issuer"));
+        Set<String> requested = new LinkedHashSet<>(Arrays.asList("transaction", "issuer"));
         List<JoinNode> result = joinResolver.resolve(requested, "transaction", allRelationships, entityMap);
         
         assertEquals(2, result.size(), "Expected instrument bridge + issuer");
@@ -104,7 +104,7 @@ class JoinResolverTest {
                 .sourceEntity("bridgeB").targetEntity("targetC").relationAlias("relC")
                 .sourceColumn("C_ID").targetColumn("ID").joinType("INNER JOIN").build());
 
-        Set<String> requested = Set.of("transaction", "relC");
+        Set<String> requested = new HashSet<>(Arrays.asList("transaction", "relC"));
         List<JoinNode> result = joinResolver.resolve(requested, "transaction", chain, entityMap);
 
         assertEquals(3, result.size(), "Should have 3 joins for the full chain");
@@ -120,7 +120,7 @@ class JoinResolverTest {
     @Test
     @DisplayName("should not duplicate join when entity appears twice in select")
     void should_not_duplicate_join_when_entity_appears_twice_in_select() {
-        Set<String> requested = new LinkedHashSet<>(List.of("transaction", "instrument"));
+        Set<String> requested = new LinkedHashSet<>(Arrays.asList("transaction", "instrument"));
         List<JoinNode> result = joinResolver.resolve(requested, "transaction", allRelationships, entityMap);
         assertEquals(1, result.size());
         assertEquals("instrument", result.get(0).getRelationAlias());

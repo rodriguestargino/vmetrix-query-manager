@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,12 +31,10 @@ class QueryValidatorTest {
 
     @BeforeEach
     void setUp() {
-        when(metadataService.getComparators()).thenReturn(
-                Map.of(
-                        "string", Arrays.asList("equals", "notEquals"),
-                        "number", Arrays.asList("equals", "greaterThan")
-                )
-        );
+        Map<String, List<String>> comparators = new HashMap<>();
+        comparators.put("string", Arrays.asList("equals", "notEquals"));
+        comparators.put("number", Arrays.asList("equals", "greaterThan"));
+        when(metadataService.getComparators()).thenReturn(comparators);
     }
 
     @Test

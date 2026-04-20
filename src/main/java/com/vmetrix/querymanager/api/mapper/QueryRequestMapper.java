@@ -47,10 +47,16 @@ public interface QueryRequestMapper {
     }
 
     default void extractAliasesFromFilter(FilterNodeDto node, java.util.Set<String> aliases) {
-        if (node instanceof FilterGroupDto groupDto && groupDto.getConditions() != null) {
-            groupDto.getConditions().forEach(c -> extractAliasesFromFilter(c, aliases));
-        } else if (node instanceof FilterConditionDto condDto && condDto.getEntity() != null) {
-            aliases.add(condDto.getEntity());
+        if (node instanceof FilterGroupDto) {
+            FilterGroupDto groupDto = (FilterGroupDto) node;
+            if (groupDto.getConditions() != null) {
+                groupDto.getConditions().forEach(c -> extractAliasesFromFilter(c, aliases));
+            }
+        } else if (node instanceof FilterConditionDto) {
+            FilterConditionDto condDto = (FilterConditionDto) node;
+            if (condDto.getEntity() != null) {
+                aliases.add(condDto.getEntity());
+            }
         }
     }
 
@@ -58,14 +64,16 @@ public interface QueryRequestMapper {
         if (dto == null) {
             return null;
         }
-        if (dto instanceof FilterGroupDto groupDto) {
+        if (dto instanceof FilterGroupDto) {
+            FilterGroupDto groupDto = (FilterGroupDto) dto;
             return FilterGroup.builder()
                     .operator(groupDto.getOperator())
                     .conditions(groupDto.getConditions().stream()
                             .map(this::mapFilterNode)
                             .collect(Collectors.toList()))
                     .build();
-        } else if (dto instanceof FilterConditionDto conditionDto) {
+        } else if (dto instanceof FilterConditionDto) {
+            FilterConditionDto conditionDto = (FilterConditionDto) dto;
             return FilterCondition.builder()
                     .entity(conditionDto.getEntity())
                     .field(conditionDto.getField())

@@ -10,7 +10,7 @@ import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * Centralised OpenAPI / Swagger configuration.
@@ -47,7 +47,7 @@ public class OpenApiConfig {
                 .externalDocs(new ExternalDocumentation()
                         .description("Project README and design decisions")
                         .url("https://github.com/vmetrix/query-manager#readme"))
-                .servers(List.of(
+                .servers(Arrays.asList(
                         new Server()
                                 .url("http://localhost:8080")
                                 .description("Local development server")))

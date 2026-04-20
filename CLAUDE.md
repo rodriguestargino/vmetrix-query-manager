@@ -14,7 +14,7 @@ changes. Everything comes from metadata configuration.
 ---
 
 ## Stack
-- Java 17
+- Java 1.8 (Java 8 compatibility)
 - Spring Boot 2.7.18
 - H2 (Oracle compatibility mode)
 - Maven

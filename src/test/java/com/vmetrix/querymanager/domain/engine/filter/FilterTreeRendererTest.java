@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 
@@ -47,7 +47,7 @@ class FilterTreeRendererTest {
     void should_render_flat_and_group_with_correct_parenthesization() {
         FilterNode tree = FilterGroup.builder()
                 .operator("AND")
-                .conditions(List.of(
+                .conditions(Arrays.asList(
                         FilterCondition.builder()
                                 .entity("transaction").field("status")
                                 .comparator("equals").value("SETTLED").build(),
@@ -79,7 +79,7 @@ class FilterTreeRendererTest {
         // status = SETTLED AND amount > 1000000 AND (assetClass IN (...) OR country = CL)
         FilterNode tree = FilterGroup.builder()
                 .operator("AND")
-                .conditions(List.of(
+                .conditions(Arrays.asList(
                         FilterCondition.builder()
                                 .entity("transaction").field("status")
                                 .comparator("equals").value("SETTLED").build(),
@@ -88,10 +88,10 @@ class FilterTreeRendererTest {
                                 .comparator("greaterThan").value(1000000).build(),
                         FilterGroup.builder()
                                 .operator("OR")
-                                .conditions(List.of(
+                                .conditions(Arrays.asList(
                                         FilterCondition.builder()
                                                 .entity("instrument").field("assetClass")
-                                                .comparator("in").value(List.of("EQUITY", "FIXED_INCOME")).build(),
+                                                .comparator("in").value(Arrays.asList("EQUITY", "FIXED_INCOME")).build(),
                                         FilterCondition.builder()
                                                 .entity("counterparty").field("country")
                                                 .comparator("equals").value("CL").build()
@@ -132,19 +132,19 @@ class FilterTreeRendererTest {
         // )
         FilterNode tree = FilterGroup.builder()
                 .operator("AND")
-                .conditions(List.of(
+                .conditions(Arrays.asList(
                         FilterCondition.builder()
                                 .entity("transaction").field("status")
                                 .comparator("equals").value("SETTLED").build(),
                         FilterGroup.builder()
                                 .operator("OR")
-                                .conditions(List.of(
+                                .conditions(Arrays.asList(
                                         FilterCondition.builder()
                                                 .entity("transaction").field("amount")
                                                 .comparator("greaterThan").value(1000000).build(),
                                         FilterGroup.builder()
                                                 .operator("AND")
-                                                .conditions(List.of(
+                                                .conditions(Arrays.asList(
                                                         FilterCondition.builder()
                                                                 .entity("counterparty").field("country")
                                                                 .comparator("equals").value("CL").build(),
