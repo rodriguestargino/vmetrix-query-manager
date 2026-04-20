@@ -125,8 +125,9 @@ The project follows **Hexagonal Architecture (Ports & Adapters)** to keep the do
 
 ```
 com.vmetrix.querymanager
-├── api/                    ← Adapters IN (controllers, DTOs, mappers)
+├── api/                    ← Adapters IN (controllers, DTOs, mappers, documentation)
 │   ├── controller/             HTTP layer — no business logic
+│   ├── documentation/          OpenAPI documentation interfaces (decoupled)
 │   ├── config/                 OpenAPI / Swagger configuration
 │   ├── dto/request/            Incoming request shapes (+ @Schema)
 │   ├── dto/response/           Outgoing response shapes (+ @Schema)
@@ -312,6 +313,7 @@ Full interactive docs at http://localhost:8080/swagger-ui.html while the service
 | Method | Endpoint                      | Description                                         |
 |--------|-------------------------------|-----------------------------------------------------|
 | `POST` | `/api/query/build`            | Generate parameterized SQL from a query spec        |
+| `POST` | `/api/query/execute`          | Generate + runtime SQL, returning actual data rows  |
 | `POST` | `/api/query/validate`         | Validate a spec and return the full error list      |
 | `GET`  | `/api/metadata/entities`      | List all entities with their fields + relations     |
 | `GET`  | `/api/metadata/comparators`   | List valid comparators grouped by data type         |
@@ -365,6 +367,30 @@ Full interactive docs at http://localhost:8080/swagger-ui.html while the service
   "error": "Bad Request",
   "message": "Entity unknown_entity does not exist in metadata"
 }
+```
+
+### POST `/api/query/execute`
+
+Builds the parameterized SQL from the specification and executes it against the H2 database. Returns a list of maps representing the result set columns.
+
+**Request**
+(Same shape as `/build`)
+
+**Response — 200 OK**
+
+```json
+[
+  {
+    "txnId": 1001,
+    "txnDate": "2026-04-18",
+    "counterpartyName": "Global Bank corp"
+  },
+  {
+    "txnId": 1002,
+    "txnDate": "2026-04-19",
+    "counterpartyName": "Alpha Investments"
+  }
+]
 ```
 
 ### POST `/api/query/validate`
@@ -466,6 +492,45 @@ FROM META_COLUMN c
 JOIN META_ENTITY e ON c.ENTITY_ID = e.ENTITY_ID
 WHERE e.ENTITY_NAME = 'transaction'
 ORDER BY c.COLUMN_ID;
+```
+
+### API Verification Examples
+
+Use `curl` or Postman to verify the endpoints. For a more comprehensive suite of tests (multi-hop joins, nested logic), see [**API Test Suite**](./docs/testing/TEST_SUITE.md).
+
+#### 1. Execute a Query (Happy Path)
+```bash
+curl -X POST http://localhost:8080/api/query/execute \
+     -H "Content-Type: application/json" \
+     -d '{
+  "select": [
+    { "entity": "transaction", "field": "txnId" },
+    { "entity": "counterparty", "field": "partyName", "alias": "counterpartyName" }
+  ],
+  "filters": {
+    "entity": "transaction", "field": "currency", "comparator": "equals", "value": "USD"
+  },
+  "maxResults": 10
+}'
+```
+
+#### 2. Build SQL (Dry Run)
+```bash
+curl -X POST http://localhost:8080/api/query/build \
+     -H "Content-Type: application/json" \
+     -d '{
+  "select": [{ "entity": "transaction", "field": "txnId" }],
+  "filters": { "entity": "transaction", "field": "status", "comparator": "equals", "value": "SETTLED" }
+}'
+```
+
+#### 3. Validate Query (Error Collection)
+```bash
+curl -X POST http://localhost:8080/api/query/validate \
+     -H "Content-Type: application/json" \
+     -d '{
+  "select": [{ "entity": "transaction", "field": "invalid_field" }]
+}'
 ```
 
 ---

@@ -38,8 +38,9 @@ changes. Everything comes from metadata configuration.
 
 ```
 com.vmetrix.querymanager
-├── api/                → Adapters IN (controllers, DTOs, mappers)
+├── api/                → Adapters IN (controllers, DTOs, mappers, docs)
 │   ├── controller/         HTTP layer only, no business logic
+│   ├── documentation/      OpenAPI documentation interfaces
 │   ├── dto/request/        Incoming request shapes
 │   ├── dto/response/       Outgoing response shapes
 │   └── mapper/             DTO ↔ domain mapping (MapStruct)
@@ -222,10 +223,10 @@ No hardcoding: all table/column names from metadata
 ## API Endpoints
 POST /api/query/build      → generate SQL from query spec
 POST /api/query/validate   → validate spec, return structured errors
-POST /api/query/execute    → generate + run SQL, return actual rows (bonus)
+POST /api/query/execute    → generate + run SQL, return actual rows
 GET  /api/metadata/entities    → list all entities with fields
 GET  /api/metadata/comparators → list comparators by data type
-POST /api/metadata/reload      → clear and reload metadata cache (bonus)
+POST /api/metadata/reload      → clear and reload metadata cache (planned)
 
 ---
 
@@ -367,7 +368,7 @@ CREATE TABLE META_COMPARATOR_TYPE (
 ## Testing Requirements
 
 ### Unit Tests (JUnit 5 + Mockito)
-- `FilterProcessorTest` — nested AND/OR groups, all comparator types, empty filters
+- `FilterTreeRendererTest` — nested AND/OR groups, all comparator types, empty filters
 - `JoinResolverTest` — single entity (no join), two entities, three entities,
   counterparty vs issuer disambiguation
 - `ComparatorStrategyFactoryTest` — all valid mappings, unknown comparator throws
