@@ -94,13 +94,26 @@ mvn test
   - `QueryValidatorTest` — unknown entity, non-filterable field, type mismatch, full error list returned (never fails fast).
   - `SelectClauseBuilderTest`, `FromClauseBuilderTest`, `OrderByClauseBuilderTest`, `QueryAssemblerTest` — clause builders.
   - `MetadataServiceTest` — cache behaviour and lookups.
-- **Integration tests** (Spring Boot Test + MockMvc) — full HTTP → SQL path.
+  - `GlobalExceptionHandlerTest` — mapping of custom exceptions to ErrorResponse DTOs.
+- **Integration tests** (Spring Boot Test + MockMvc) — full HTTP layer verification.
   - `QueryBuildIntegrationTest` — happy path from HTTP request to SQL response.
   - `QueryValidationIntegrationTest` — invalid request returns HTTP 400 with the complete error list.
   - `MetadataControllerIntegrationTest` — `GET /api/metadata/entities` returns all three entities.
   - `MetadataServiceIntegrationTest` — loads metadata against the real H2 schema.
-  - `OpenApiIntegrationTest` — `/v3/api-docs` exposes all four endpoints, request/response examples, and API metadata.
+  - `OpenApiIntegrationTest` — basic `/v3/api-docs` accessibility.
+  - `OpenApiContractTest` — deep verification of documentation picked up from interfaces and centralized examples.
   - `QueryManagerApplicationTest` — context loads.
+
+### Architecture Tests
+
+The project uses **ArchUnit** to enforce architectural integrity and prevent drift from the rules defined in `CLAUDE.md`.
+
+- `ArchitectureTest` — Enforces 16 specific rules, including:
+  - **Hexagonal Layering**: Ensures `api` → `application` → `domain` dependency flow; prevents leaks from `infrastructure` or `api` into the core.
+  - **Strict Rule #4**: Zero `@Spring` dependencies in the `domain` layer.
+  - **Strict Rule #5**: Zero `JPA` imports in the `domain` layer.
+  - **Naming Conventions**: Enforces `*Controller`, `*Service`, `*Strategy`, and `*Builder` placement and naming.
+  - **Cycle Detection**: Prevents circular dependencies between top-level packages.
 
 Run a single class:
 
