@@ -738,5 +738,3 @@ This section summarizes how AI assistance was used during the build of this PoC.
 ---
 
 ## License
-
-Proprietary — VMetrix © 2026
